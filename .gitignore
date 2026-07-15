@@ -1,0 +1,36 @@
+# Secrets
+.env.local
+.env.*.local
+
+# Power Platform
+.pac/
+auth.json
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Tests
+coverage/
+test-results/
+playwright-report/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Solution zips
+solution/*.zip
+
+# Wizard state
+.wizard-state.json
+
+# Temp
+*.tmp
+*.log
