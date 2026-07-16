@@ -21,6 +21,8 @@ export interface Pt_assignmentsBase {
   pt_assignmentid: string;
   pt_assignmentname?: string;
   pt_assignmentnote?: string;
+  "pt_project@odata.bind": string;
+  "pt_resource@odata.bind": string;
   statecode: Pt_assignmentsstatecode;
   statuscode?: Pt_assignmentsstatuscode;
   timezoneruleversionnumber?: number;
@@ -41,6 +43,8 @@ export interface Pt_assignments extends Pt_assignmentsBase {
   owneridname: string;
   owneridyominame: string;
   owningbusinessunitname: string;
+  pt_projectname?: string;
+  pt_resourcename?: string;
   statecodename?: string;
   statuscodename?: string;
   versionnumber?: number;
@@ -58,4 +62,8 @@ export interface Pt_assignments extends Pt_assignmentsBase {
   _owningteam_value?: string;
   owninguser?: object;
   _owninguser_value?: string;
+  pt_project?: object;
+  _pt_project_value?: string;
+  pt_resource?: object;
+  _pt_resource_value?: string;
 }

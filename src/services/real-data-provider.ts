@@ -29,6 +29,15 @@ function lookupValue(record: object, field: string): string | undefined {
   return raw === undefined || raw === null ? undefined : String(raw);
 }
 
+// Dataverse auto-populates a denormalized `<lookup>name` field with the related
+// record's primary name (no @odata annotation needed), so the UI can show real
+// names (e.g. "VitaPharm Labs") instead of a GUID. Fall back to the GUID.
+function lookupName(record: object, field: string): string | undefined {
+  const name = (record as Record<string, unknown>)[`${field}name`];
+  if (name !== undefined && name !== null && String(name).length > 0) return String(name);
+  return lookupValue(record, field);
+}
+
 // ── Project ──────────────────────────────────────────────────────────────
 
 export function mapProjectFromConnector(record: Pt_projects): Project {
@@ -36,8 +45,8 @@ export function mapProjectFromConnector(record: Pt_projects): Project {
     id: record.pt_projectid,
     name: record.pt_projectname ?? '',
     startDate: record.pt_startdate ?? '',
-    client: lookupValue(record, 'pt_client'),
-    projectLead: lookupValue(record, 'pt_projectlead'),
+    client: lookupName(record, 'pt_client'),
+    projectLead: lookupName(record, 'pt_projectlead'),
     practiceArea: Number(record.pt_practicearea ?? 0),
     projectType: record.pt_projecttype !== undefined ? Number(record.pt_projecttype) : undefined,
     status: record.pt_status !== undefined ? Number(record.pt_status) : undefined,
@@ -73,7 +82,7 @@ export function mapResourceFromConnector(record: Pt_resources): Resource {
     maturity: record.pt_maturity !== undefined ? Number(record.pt_maturity) : undefined,
     resourceUrl: optional(record.pt_resourceurl),
     description: optional(record.pt_description),
-    owner: lookupValue(record, 'pt_owner'),
+    owner: lookupName(record, 'pt_owner'),
     usageCount: record.pt_usagecount !== undefined ? Number(record.pt_usagecount) : undefined,
     lastUsedOn: optional(record.pt_lastusedon),
   };

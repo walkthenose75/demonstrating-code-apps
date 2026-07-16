@@ -47,6 +47,7 @@ export interface Pt_resourcesBase {
   pt_description?: string;
   pt_lastusedon?: string;
   pt_maturity?: Pt_resourcespt_maturity;
+  "pt_owner@odata.bind"?: string;
   pt_practicearea?: Pt_resourcespt_practicearea;
   pt_resourceid: string;
   pt_resourcename?: string;
@@ -74,6 +75,8 @@ export interface Pt_resources extends Pt_resourcesBase {
   owneridyominame: string;
   owningbusinessunitname: string;
   pt_maturityname?: string;
+  pt_ownername?: string;
+  pt_owneryominame?: string;
   pt_practiceareaname?: string;
   pt_resourcetypename?: string;
   statecodename?: string;
@@ -93,4 +96,6 @@ export interface Pt_resources extends Pt_resourcesBase {
   _owningteam_value?: string;
   owninguser?: object;
   _owninguser_value?: string;
+  pt_owner?: object;
+  _pt_owner_value?: string;
 }

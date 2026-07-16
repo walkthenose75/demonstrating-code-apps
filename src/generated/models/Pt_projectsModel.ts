@@ -56,9 +56,11 @@ export interface Pt_projectsBase {
   overriddencreatedon?: string;
   ownerid: string;
   owneridtype: string;
+  "pt_client@odata.bind": string;
   pt_outcome?: Pt_projectspt_outcome;
   pt_practicearea?: Pt_projectspt_practicearea;
   pt_projectid: string;
+  "pt_projectlead@odata.bind"?: string;
   pt_projectname?: string;
   pt_projecttype?: Pt_projectspt_projecttype;
   pt_resourcecount?: number;
@@ -86,8 +88,12 @@ export interface Pt_projects extends Pt_projectsBase {
   owneridname: string;
   owneridyominame: string;
   owningbusinessunitname: string;
+  pt_clientname?: string;
+  pt_clientyominame?: string;
   pt_outcomename?: string;
   pt_practiceareaname?: string;
+  pt_projectleadname?: string;
+  pt_projectleadyominame?: string;
   pt_projecttypename?: string;
   pt_riskreasonname?: string;
   pt_statusname?: string;
@@ -108,4 +114,8 @@ export interface Pt_projects extends Pt_projectsBase {
   _owningteam_value?: string;
   owninguser?: object;
   _owninguser_value?: string;
+  pt_client?: object;
+  _pt_client_value?: string;
+  pt_projectlead?: object;
+  _pt_projectlead_value?: string;
 }
