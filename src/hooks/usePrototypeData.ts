@@ -73,6 +73,19 @@ export function useSaveProject() {
   });
 }
 
+export function useDeleteProject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => provider.projects.remove(id),
+    onSuccess: (_result, id) => {
+      queryClient.setQueryData<Project[]>(prototypeQueryKeys.projects, (old) =>
+        old ? old.filter((project) => project.id !== id) : old,
+      );
+      queryClient.removeQueries({ queryKey: prototypeQueryKeys.projectById(id) });
+    },
+  });
+}
+
 export function useResources() {
   return useQuery({
     queryKey: prototypeQueryKeys.resources,

@@ -142,6 +142,9 @@ export function createRealDataProvider(): AppDataProvider {
           : await Pt_projectsService.create(payload as unknown as Omit<Pt_projectsBase, 'pt_projectid'>);
         return mapProjectFromConnector(result.data as Pt_projects);
       },
+      async remove(id: string) {
+        await Pt_projectsService.delete(id);
+      },
     },
     resources: {
       async list() {

@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
-import { makeStyles, tokens, Spinner, MessageBar, MessageBarBody, Button, Input, Dropdown, Option, Text, Caption1 } from '@fluentui/react-components';
-import { AddRegular, SearchRegular } from '@fluentui/react-icons';
-import { useProjects } from '@/hooks/usePrototypeData';
+import { makeStyles, tokens, Spinner, MessageBar, MessageBarBody, Button, Input, Dropdown, Option, Text, Caption1, Dialog, DialogSurface, DialogTitle, DialogBody, DialogContent, DialogActions } from '@fluentui/react-components';
+import { AddRegular, SearchRegular, EditRegular, DeleteRegular } from '@fluentui/react-icons';
+import { useProjects, useDeleteProject } from '@/hooks/usePrototypeData';
 import { filterProjects, isCovered } from '@/lib/analytics';
 import type { ProjectFilter } from '@/lib/analytics';
+import type { Project } from '@/types/domain-models';
 import { practiceAreaSet, projectTypeSet } from '@/lib/optionSets';
 import { clientName, leadName } from '@/mockData/reference';
 import { formatDate } from '@/lib/format';
@@ -50,15 +51,35 @@ const useStyles = makeStyles({
   },
   empty: { padding: '48px', textAlign: 'center', color: tokens.colorNeutralForeground3 },
   center: { display: 'grid', placeItems: 'center', padding: '48px' },
+  rowActions: { display: 'flex', gap: '4px', justifyContent: 'flex-end' },
 });
 
 export function ProjectsPage() {
   const styles = useStyles();
   const { data, isLoading, isError } = useProjects();
   const [open, setOpen] = useState(false);
+  const [dialogProject, setDialogProject] = useState<Project | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Project | null>(null);
+  const deleteProject = useDeleteProject();
   const [filter, setFilter] = useState<ProjectFilter>({ search: '', area: null, coverage: 'all' });
 
   const rows = useMemo(() => filterProjects(data ?? [], filter), [data, filter]);
+
+  function openNew() {
+    setDialogProject(null);
+    setOpen(true);
+  }
+
+  function openEdit(project: Project) {
+    setDialogProject(project);
+    setOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    await deleteProject.mutateAsync(pendingDelete.id);
+    setPendingDelete(null);
+  }
 
   return (
     <div className={styles.page}>
@@ -66,7 +87,7 @@ export function ProjectsPage() {
         title="Projects"
         subtitle="Every project in the portfolio and whether it is backed by a reusable resource"
         actions={
-          <Button appearance="primary" icon={<AddRegular />} onClick={() => setOpen(true)}>
+          <Button appearance="primary" icon={<AddRegular />} onClick={openNew}>
             New Project
           </Button>
         }
@@ -129,6 +150,7 @@ export function ProjectsPage() {
                   <th className={styles.th}>Lead</th>
                   <th className={styles.th}>Client</th>
                   <th className={styles.th}>Resources</th>
+                  <th className={styles.th} style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -159,6 +181,24 @@ export function ProjectsPage() {
                           {p.resourceCount ?? 0}
                         </span>
                       </td>
+                      <td className={styles.td}>
+                        <span className={styles.rowActions}>
+                          <Button
+                            appearance="subtle"
+                            size="small"
+                            icon={<EditRegular />}
+                            aria-label={`Edit ${p.name}`}
+                            onClick={() => openEdit(p)}
+                          />
+                          <Button
+                            appearance="subtle"
+                            size="small"
+                            icon={<DeleteRegular />}
+                            aria-label={`Delete ${p.name}`}
+                            onClick={() => setPendingDelete(p)}
+                          />
+                        </span>
+                      </td>
                     </tr>
                   );
                 })}
@@ -172,7 +212,28 @@ export function ProjectsPage() {
         </Caption1>
       </div>
 
-      <LogProjectDialog open={open} onOpenChange={setOpen} />
+      <LogProjectDialog open={open} onOpenChange={setOpen} project={dialogProject} />
+
+      <Dialog open={pendingDelete !== null} onOpenChange={(_e, d) => { if (!d.open) setPendingDelete(null); }}>
+        <DialogSurface>
+          <DialogBody>
+            <DialogTitle>Delete project?</DialogTitle>
+            <DialogContent>
+              <Text>
+                This permanently deletes <Text weight="semibold">{pendingDelete?.name}</Text>. This action can’t be undone.
+              </Text>
+            </DialogContent>
+            <DialogActions>
+              <Button appearance="secondary" onClick={() => setPendingDelete(null)} disabled={deleteProject.isPending}>
+                Cancel
+              </Button>
+              <Button appearance="primary" onClick={confirmDelete} disabled={deleteProject.isPending}>
+                {deleteProject.isPending ? 'Deleting…' : 'Delete'}
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 }

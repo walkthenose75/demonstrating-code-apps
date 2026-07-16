@@ -26,6 +26,7 @@ export interface ProjectRepository {
   list(): Promise<Project[]>;
   getById(id: string): Promise<Project | null>;
   save(input: Partial<Project>): Promise<Project>;
+  remove(id: string): Promise<void>;
 }
 
 export interface ResourceRepository {

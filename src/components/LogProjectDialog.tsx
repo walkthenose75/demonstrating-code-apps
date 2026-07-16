@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import {
   makeStyles,
@@ -21,6 +21,7 @@ import { toDataverseFieldName } from '@/lib/dataverse-field-name';
 import { practiceAreaSet, projectTypeSet } from '@/lib/optionSets';
 import { mockClients, mockTeamMembers } from '@/mockData/reference';
 import { useSaveProject } from '@/hooks/usePrototypeData';
+import type { Project } from '@/types/domain-models';
 
 const TABLE = 'pt_project';
 
@@ -43,6 +44,8 @@ const useStyles = makeStyles({
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When provided, the dialog edits this project instead of creating a new one. */
+  project?: Project | null;
 }
 
 interface FieldProps {
@@ -66,9 +69,10 @@ function Field({ field, label, children, error }: FieldProps) {
   );
 }
 
-export function LogProjectDialog({ open, onOpenChange }: Props) {
+export function LogProjectDialog({ open, onOpenChange, project }: Props) {
   const styles = useStyles();
   const save = useSaveProject();
+  const isEdit = Boolean(project?.id);
 
   const [name, setName] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -90,11 +94,30 @@ export function LogProjectDialog({ open, onOpenChange }: Props) {
     setShowErrors(false);
   }
 
+  // Prefill from the project when opening in edit mode; clear for a fresh create.
+  useEffect(() => {
+    if (!open) return;
+    if (project) {
+      setName(project.name ?? '');
+      setStartDate(project.startDate ?? '');
+      setPracticeArea(project.practiceArea);
+      setClient(project.client);
+      setProjectLead(project.projectLead);
+      setProjectType(project.projectType);
+      setTeamSize(project.teamSize !== undefined ? String(project.teamSize) : '');
+      setShowErrors(false);
+    } else {
+      reset();
+    }
+  }, [open, project]);
+
   const missingName = !name.trim();
   const missingDate = !startDate;
   const missingArea = practiceArea === undefined;
   const missingClient = !client;
-  const invalid = missingName || missingDate || missingArea || missingClient;
+  // Client is a lookup we don't rewrite on edit (and may render as a display
+  // name in connected mode), so only require it when creating a new project.
+  const invalid = missingName || missingDate || missingArea || (!isEdit && missingClient);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -103,7 +126,7 @@ export function LogProjectDialog({ open, onOpenChange }: Props) {
       return;
     }
     await save.mutateAsync({
-      id: `project-${Date.now()}`,
+      id: isEdit ? project!.id : `project-${Date.now()}`,
       name: name.trim(),
       startDate,
       practiceArea: practiceArea!,
@@ -111,7 +134,7 @@ export function LogProjectDialog({ open, onOpenChange }: Props) {
       projectLead,
       projectType,
       teamSize: teamSize ? Number(teamSize) : undefined,
-      resourceCount: 0,
+      ...(isEdit ? {} : { resourceCount: 0 }),
     });
     reset();
     onOpenChange(false);
@@ -129,7 +152,7 @@ export function LogProjectDialog({ open, onOpenChange }: Props) {
       <DialogSurface aria-describedby={undefined}>
         <form onSubmit={handleSubmit}>
           <DialogBody>
-            <DialogTitle>New Project</DialogTitle>
+            <DialogTitle>{isEdit ? 'Edit Project' : 'New Project'}</DialogTitle>
             <DialogContent>
               <div className={styles.form}>
                 <Field field="name" label="Project Name" error={err(missingName, 'Project name is required.')}>
@@ -222,7 +245,7 @@ export function LogProjectDialog({ open, onOpenChange }: Props) {
             <DialogActions>
               <Button appearance="secondary" type="button" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button appearance="primary" type="submit" disabled={invalid || save.isPending}>
-                {save.isPending ? 'Saving…' : 'Create project'}
+                {save.isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create project'}
               </Button>
             </DialogActions>
           </DialogBody>

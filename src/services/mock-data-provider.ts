@@ -41,6 +41,10 @@ function createCollectionRepository<T extends PrototypeRecord>(records: T[], bui
       records.unshift(record);
       return cloneRecord(record);
     },
+    async remove(id: string): Promise<void> {
+      const index = records.findIndex((record) => record.id === id);
+      if (index >= 0) records.splice(index, 1);
+    },
   };
 }
 
