@@ -218,6 +218,32 @@
           "x-ms-schema-name": "OwningUser",
           "x-ms-read-only": true
         },
+        "pt_client": {
+          "type": "string",
+          "title": "Client",
+          "x-ms-dataverse-attribute": "pt_client",
+          "x-ms-dataverse-type": "LookupType",
+          "x-ms-schema-name": "pt_client",
+          "required": true
+        },
+        "pt_clientname": {
+          "type": "string",
+          "title": "pt_clientname",
+          "x-ms-dataverse-attribute": "pt_clientname",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_clientName",
+          "x-ms-read-only": true,
+          "maxLength": 160
+        },
+        "pt_clientyominame": {
+          "type": "string",
+          "title": "pt_clientyominame",
+          "x-ms-dataverse-attribute": "pt_clientyominame",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_clientYomiName",
+          "x-ms-read-only": true,
+          "maxLength": 160
+        },
         "pt_outcome": {
           "type": "string",
           "title": "outcome",
@@ -310,6 +336,31 @@
           "x-ms-dataverse-primary-id": true,
           "required": true,
           "x-ms-keyType": "primary"
+        },
+        "pt_projectlead": {
+          "type": "string",
+          "title": "Project Lead",
+          "x-ms-dataverse-attribute": "pt_projectlead",
+          "x-ms-dataverse-type": "LookupType",
+          "x-ms-schema-name": "pt_projectlead"
+        },
+        "pt_projectleadname": {
+          "type": "string",
+          "title": "pt_projectleadname",
+          "x-ms-dataverse-attribute": "pt_projectleadname",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_projectleadName",
+          "x-ms-read-only": true,
+          "maxLength": 200
+        },
+        "pt_projectleadyominame": {
+          "type": "string",
+          "title": "pt_projectleadyominame",
+          "x-ms-dataverse-attribute": "pt_projectleadyominame",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_projectleadYomiName",
+          "x-ms-read-only": true,
+          "maxLength": 200
         },
         "pt_projectname": {
           "type": "string",
@@ -548,6 +599,7 @@
         "owneridtype",
         "owneridyominame",
         "owningbusinessunitname",
+        "pt_client",
         "pt_projectid",
         "statecode"
       ]

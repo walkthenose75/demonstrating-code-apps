@@ -245,6 +245,40 @@
           "x-ms-schema-name": "pt_assignmentnote",
           "maxLength": 200
         },
+        "pt_project": {
+          "type": "string",
+          "title": "Project",
+          "x-ms-dataverse-attribute": "pt_project",
+          "x-ms-dataverse-type": "LookupType",
+          "x-ms-schema-name": "pt_project",
+          "required": true
+        },
+        "pt_projectname": {
+          "type": "string",
+          "title": "pt_projectname",
+          "x-ms-dataverse-attribute": "pt_projectname",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_projectName",
+          "x-ms-read-only": true,
+          "maxLength": 200
+        },
+        "pt_resource": {
+          "type": "string",
+          "title": "Resource",
+          "x-ms-dataverse-attribute": "pt_resource",
+          "x-ms-dataverse-type": "LookupType",
+          "x-ms-schema-name": "pt_resource",
+          "required": true
+        },
+        "pt_resourcename": {
+          "type": "string",
+          "title": "pt_resourcename",
+          "x-ms-dataverse-attribute": "pt_resourcename",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_resourceName",
+          "x-ms-read-only": true,
+          "maxLength": 200
+        },
         "statecode": {
           "type": "string",
           "title": "Status",
@@ -342,6 +376,8 @@
         "owneridyominame",
         "owningbusinessunitname",
         "pt_assignmentid",
+        "pt_project",
+        "pt_resource",
         "statecode"
       ]
     }

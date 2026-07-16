@@ -270,6 +270,31 @@
           "x-ms-schema-name": "pt_maturityName",
           "x-ms-read-only": true
         },
+        "pt_owner": {
+          "type": "string",
+          "title": "Owner",
+          "x-ms-dataverse-attribute": "pt_owner",
+          "x-ms-dataverse-type": "LookupType",
+          "x-ms-schema-name": "pt_owner"
+        },
+        "pt_ownername": {
+          "type": "string",
+          "title": "pt_ownername",
+          "x-ms-dataverse-attribute": "pt_ownername",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_ownerName",
+          "x-ms-read-only": true,
+          "maxLength": 200
+        },
+        "pt_owneryominame": {
+          "type": "string",
+          "title": "pt_owneryominame",
+          "x-ms-dataverse-attribute": "pt_owneryominame",
+          "x-ms-dataverse-type": "StringType",
+          "x-ms-schema-name": "pt_ownerYomiName",
+          "x-ms-read-only": true,
+          "maxLength": 200
+        },
         "pt_practicearea": {
           "type": "string",
           "title": "practicearea",
