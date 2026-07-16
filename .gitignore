@@ -2,6 +2,10 @@
 .env.local
 .env.*.local
 
+# Dataverse provisioning auth artifacts (token material — never commit)
+dataverse/.devicecode.txt
+dataverse/.authrecord.json
+
 # Power Platform
 .pac/
 auth.json

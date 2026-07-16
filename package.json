@@ -37,6 +37,8 @@
     "dev": "concurrently \"vite --port 3000\" \"pac code run\"",
     "dev:local": "set VITE_USE_MOCK=true && vite --port 3000",
     "prototype:seed": "pacaf-seed dataverse/planning-payload.json",
+    "provision": "node skills/dataverse-provision/provision.mjs --yes",
+    "provision:dry": "node skills/dataverse-provision/provision.mjs --dry-run",
     "typecheck": "tsc --noEmit",
     "prebuild": "pacaf-patch-datasources",
     "build": "npm run typecheck && vite build",

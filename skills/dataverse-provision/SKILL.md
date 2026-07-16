@@ -31,13 +31,15 @@ supports global option sets and rollups natively. Use this skill as the fallback
 ## Prerequisites
 
 1. `pip install PowerPlatform-Dataverse-Client pandas azure-identity`
-2. The Code App's environment already created (`pac code init` done) and a
-   **publisher whose prefix matches `publisher.prefix` in the payload** exists in
-   the target environment. If the environment's publisher prefix differs from the
-   payload (common when the setup wizard chose a different prefix), decide which
-   wins **before** running — either pass `--prefix <envPrefix>` or create the
-   payload's publisher. The prefix is immutable once data exists.
-3. Auth: an identity that is an admin / customizer in the target environment.
+2. The Code App's environment already created (`pac code init` done).
+3. A **publisher whose prefix matches `publisher.prefix` in the payload** in the
+   target environment. **You no longer have to create it by hand** — pass
+   `--ensure-solution` and the skill creates the publisher (by prefix) **and** the
+   solution if they don't already exist, then reuses them on re-runs. If a
+   publisher with a *different* prefix already owns your data, decide which wins
+   **before** running (`--prefix <envPrefix>`); the prefix is immutable once data
+   exists.
+4. Auth: an identity that is an admin / customizer in the target environment.
 
 ## Usage
 
@@ -45,32 +47,60 @@ supports global option sets and rollups natively. Use this skill as the fallback
 # 1) Validate the plan — no auth, no mutation. Always do this first.
 python provision.py --dry-run
 
-# 2) Live run with device-code sign-in (headless-friendly; needs a human once).
+# 2a) LOW-FRICTION DEFAULT — Service Principal (headless, no prompts, CI-safe).
+#     Set AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET in .env first
+#     (the App Registration must be an Application User in the environment).
+python provision.py \
+  --url https://org.crm.dynamics.com \
+  --auth env \
+  --ensure-solution --solution ProjectTracker --yes
+
+# 2b) FALLBACK — device-code sign-in (no SPN needed; one interactive sign-in).
+#     The verification URL + code are printed AND written to
+#     dataverse/.devicecode.txt; an AuthenticationRecord is saved to
+#     dataverse/.authrecord.json so subsequent runs reuse the token silently.
+#     ⚠ Complete the sign-in PROMPTLY — device codes expire in a couple of minutes.
 python provision.py \
   --url https://org.crm.dynamics.com \
   --auth devicecode --tenant contoso.onmicrosoft.com \
-  --solution MySolutionUniqueName --yes
+  --ensure-solution --solution ProjectTracker --yes
 
-# Alternatives:
-#   --auth azurecli   use current `az login` (must be the TARGET tenant)
-#   --auth env        ClientSecretCredential from AZURE_TENANT_ID/CLIENT_ID/CLIENT_SECRET
+# Other auth:
+#   --auth azurecli   use current `az login` (MUST be the TARGET tenant)
 #   --prefix contoso  override the payload publisher prefix
 ```
 
 Arguments: `--payload` (default `dataverse/planning-payload.json`), `--url`
-(default `$PP_ENV_DEV`), `--solution`, `--prefix`, `--auth {devicecode,azurecli,env}`,
-`--tenant`, `--dry-run`, `--yes`.
+(default `$PP_ENV_DEV`), `--solution`, `--prefix`,
+`--auth {devicecode,azurecli,env}`, `--tenant`, `--ensure-solution`,
+`--publisher-name`, `--publisher-friendly`, `--option-value-prefix`,
+`--dry-run`, `--yes`.
+
+### Auth is resilient by design
+
+- **Device-code**: prompt is flushed to stdout **and** a file, and the
+  `AuthenticationRecord` is persisted (`dataverse/.authrecord.json`) so only the
+  first run needs interactive sign-in. Both files are git-ignored (token material).
+- **Transient metadata conflicts**: Dataverse metadata ops are async; a
+  just-created table can still be "customizing" when the next relationship starts
+  (`Cannot start another EntityCustomization`). Lookup creation retries these with
+  backoff automatically.
+- **Idempotent**: existing tables/columns/lookups are detected and skipped, so the
+  command is safe to re-run after any partial failure.
 
 ## What it does
 
-1. Loads the payload; turns each **global option set** into a **local** `IntEnum`
+1. (with `--ensure-solution`) Ensures the **publisher** (by prefix) and
+   **solution** exist, creating them if missing and reusing them otherwise.
+2. Loads the payload; turns each **global option set** into a **local** `IntEnum`
    applied per column.
-2. For each table: creates it (primary + primitive + choice columns) if missing,
+3. For each table: creates it (primary + primitive + choice columns) if missing,
    or adds only missing columns if it already exists (idempotent).
-3. After all tables exist, creates the **lookup** columns / relationships
+4. After all tables exist, creates the **lookup** columns / relationships
    (`create_lookup_field`) — including lookups to OOB tables (`account`,
-   `systemuser`) — skipping any that already exist.
-4. Prints a summary and the follow-up `pac code add-data-source` commands.
+   `systemuser`) — skipping any that already exist and retrying transient
+   metadata-concurrency errors with backoff.
+5. Prints a summary and the follow-up `pac code add-data-source` commands.
 
 ## Known simplifications (all printed in the plan, never silent)
 

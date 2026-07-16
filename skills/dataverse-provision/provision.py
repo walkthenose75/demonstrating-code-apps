@@ -30,7 +30,7 @@ Auth modes (choose with --auth):
 Usage:
   python provision.py --dry-run
   python provision.py --url https://org.crm.dynamics.com --auth devicecode \
-      --tenant contoso.onmicrosoft.com --solution ProjectTracker --yes
+      --tenant contoso.onmicrosoft.com --solution DemoAssetTracker --yes
 """
 from __future__ import annotations
 
@@ -39,6 +39,7 @@ import json
 import os
 import re
 import sys
+import time
 from enum import IntEnum
 from typing import Any
 
@@ -146,7 +147,106 @@ def make_credential(args):
         )
     if not args.tenant:
         sys.exit("ERROR: --auth devicecode requires --tenant (GUID or verified domain).")
-    return DeviceCodeCredential(tenant_id=args.tenant, client_id=AZ_CLI_CLIENT)
+
+    def _prompt(verification_uri: str, user_code: str, expires_on) -> None:
+        msg = f"\n>>> DEVICE CODE: open {verification_uri} and enter code:  {user_code}\n"
+        print(msg, flush=True)
+        # Also write to a file so a headless/piped caller can surface the code
+        # even if stdout is buffered.
+        try:
+            code_file = os.environ.get("DVP_DEVICE_CODE_FILE", "dataverse/.devicecode.txt")
+            with open(code_file, "w", encoding="utf-8") as fh:
+                fh.write(f"{verification_uri}\n{user_code}\n")
+        except OSError:
+            pass
+
+    # Enable a persistent token cache + saved AuthenticationRecord so the
+    # interactive sign-in survives across process runs (subsequent provisioning
+    # commands reuse the token silently instead of re-prompting a device code).
+    rec_path = os.environ.get("DVP_AUTH_RECORD_FILE", "dataverse/.authrecord.json")
+    try:
+        from azure.identity import (  # noqa: WPS433
+            AuthenticationRecord,
+            TokenCachePersistenceOptions,
+        )
+        cache_opts = TokenCachePersistenceOptions(name="dataverse-provision")
+        record = None
+        if os.path.exists(rec_path):
+            try:
+                with open(rec_path, "r", encoding="utf-8") as fh:
+                    record = AuthenticationRecord.deserialize(fh.read())
+            except Exception:
+                record = None
+        cred = DeviceCodeCredential(
+            tenant_id=args.tenant, client_id=AZ_CLI_CLIENT,
+            prompt_callback=_prompt,
+            cache_persistence_options=cache_opts,
+            authentication_record=record,
+        )
+        if record is None:
+            # Force the interactive flow now and persist the record for reuse.
+            new_record = cred.authenticate()
+            try:
+                with open(rec_path, "w", encoding="utf-8") as fh:
+                    fh.write(new_record.serialize())
+            except OSError:
+                pass
+        return cred
+    except Exception:
+        return DeviceCodeCredential(
+            tenant_id=args.tenant, client_id=AZ_CLI_CLIENT, prompt_callback=_prompt,
+        )
+
+
+def ensure_solution(client, *, prefix: str, solution_name: str,
+                    publisher_name: str, publisher_friendly: str,
+                    option_value_prefix: int) -> str:
+    """Ensure a publisher (by customization prefix) and solution (by unique name)
+    exist, creating them idempotently. Returns the solution unique name to
+    provision into. Fills the gap that provision.py otherwise leaves (it does not
+    create a publisher/solution, so pt_-prefixed objects would be rejected by the
+    Default Solution's publisher)."""
+    # 1) Publisher — reuse any existing publisher that already owns this prefix.
+    pubs = client.records.list(
+        "publisher",
+        filter=f"customizationprefix eq '{prefix}'",
+        select=["publisherid", "uniquename", "friendlyname", "customizationprefix"],
+        top=1,
+    )
+    rows = list(getattr(pubs, "value", None) or getattr(pubs, "records", None) or pubs)
+    if rows:
+        pub = rows[0]
+        publisher_id = pub["publisherid"]
+        log(f"   publisher '{pub.get('uniquename')}' (prefix '{prefix}') exists — reuse")
+    else:
+        pub_unique = publisher_name or f"{prefix}publisher"
+        publisher_id = client.records.create("publisher", {
+            "uniquename": pub_unique,
+            "friendlyname": publisher_friendly or pub_unique,
+            "customizationprefix": prefix,
+            "customizationoptionvalueprefix": option_value_prefix,
+        })
+        log(f"   created publisher '{pub_unique}' (prefix '{prefix}', optvalprefix {option_value_prefix})")
+
+    # 2) Solution — reuse by unique name, else create under the publisher.
+    sols = client.records.list(
+        "solution",
+        filter=f"uniquename eq '{solution_name}'",
+        select=["solutionid", "uniquename"],
+        top=1,
+    )
+    srows = list(getattr(sols, "value", None) or getattr(sols, "records", None) or sols)
+    if srows:
+        log(f"   solution '{solution_name}' exists — reuse")
+    else:
+        client.records.create("solution", {
+            "uniquename": solution_name,
+            "friendlyname": solution_name,
+            "version": "1.0.0.0",
+            "publisherid@odata.bind": f"/publishers({publisher_id})",
+        })
+        log(f"   created solution '{solution_name}' under publisher prefix '{prefix}'")
+    return solution_name
 
 
 def main() -> int:
@@ -160,6 +260,12 @@ def main() -> int:
     ap.add_argument("--tenant", default=None, help="Tenant GUID or verified domain (devicecode)")
     ap.add_argument("--dry-run", action="store_true", help="Print the plan; do not connect or mutate")
     ap.add_argument("--yes", action="store_true", help="Skip the confirmation prompt")
+    ap.add_argument("--ensure-solution", action="store_true",
+                    help="Create the publisher (matching the payload/prefix) and solution if they do not exist, then provision into that solution.")
+    ap.add_argument("--publisher-name", default=None, help="Publisher unique name (default: derived from prefix)")
+    ap.add_argument("--publisher-friendly", default=None, help="Publisher friendly name (default: payload publisher.displayName)")
+    ap.add_argument("--option-value-prefix", type=int, default=10000,
+                    help="Publisher customization option-value prefix (default 10000 => option values based at 100000000). Only used when creating a new publisher.")
     args = ap.parse_args()
 
     payload = load_payload(args.payload)
@@ -219,6 +325,19 @@ def main() -> int:
     client = DataverseClient(args.url, cred)
     log(" connected. provisioning…")
 
+    if args.ensure_solution:
+        if not args.solution:
+            args.solution = payload.get("solution", {}).get("uniqueName") or "ProjectTracker"
+        log(f" ensuring publisher (prefix '{prefix}') + solution '{args.solution}'…")
+        args.solution = ensure_solution(
+            client,
+            prefix=prefix,
+            solution_name=args.solution,
+            publisher_name=args.publisher_name,
+            publisher_friendly=args.publisher_friendly or payload["publisher"].get("displayName"),
+            option_value_prefix=args.option_value_prefix,
+        )
+
     # 1) Tables + columns (idempotent)
     for entry in plan:
         t = entry["table"]
@@ -237,7 +356,11 @@ def main() -> int:
             )
             log(f"   created table {t['schemaName']} (+{len(entry['columns'])} cols)")
         else:
-            have = {c.lower() for c in getattr(existing, "columns", {}) or {}}
+            try:
+                cols = client.tables.list_columns(logical) or []
+                have = {c.lower() for c in cols}
+            except Exception:
+                have = {c.lower() for c in getattr(existing, "columns", {}) or {}}
             missing = {k: v for k, v in entry["columns"].items() if k.lower() not in have}
             if missing:
                 client.tables.add_columns(t["schemaName"], missing)
@@ -259,14 +382,31 @@ def main() -> int:
             if lk["field"].lower() in have:
                 log(f"   lookup {lk['field']} exists — skip")
                 continue
-            client.tables.create_lookup_field(
-                referencing_table=referencing,
-                lookup_field_name=lk["field"],
-                referenced_table=target,
-                display_name=lk["display"],
-                required=lk["required"],
-                solution=args.solution,
-            )
+            # Dataverse metadata ops are async; a just-created table can still be
+            # "customizing" when the next relationship starts. Retry the transient
+            # EntityCustomization concurrency error with backoff.
+            attempts = 0
+            while True:
+                attempts += 1
+                try:
+                    client.tables.create_lookup_field(
+                        referencing_table=referencing,
+                        lookup_field_name=lk["field"],
+                        referenced_table=target,
+                        display_name=lk["display"],
+                        required=lk["required"],
+                        solution=args.solution,
+                    )
+                    break
+                except Exception as exc:  # noqa: BLE001
+                    msg = str(exc)
+                    transient = "EntityCustomization" in msg or "try again later" in msg
+                    if transient and attempts <= 8:
+                        wait = min(5 * attempts, 30)
+                        log(f"   lookup {lk['field']} transient conflict — retry {attempts} in {wait}s")
+                        time.sleep(wait)
+                        continue
+                    raise
             log(f"   created lookup {referencing}.{lk['field']} -> {target}")
 
     client.close()
