@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { makeStyles, tokens, Spinner, MessageBar, MessageBarBody, Button, Input, Dropdown, Option, Text, Caption1, Dialog, DialogSurface, DialogTitle, DialogBody, DialogContent, DialogActions } from '@fluentui/react-components';
 import { AddRegular, SearchRegular, EditRegular, DeleteRegular } from '@fluentui/react-icons';
 import { useProjects, useDeleteProject } from '@/hooks/usePrototypeData';
@@ -52,6 +53,12 @@ const useStyles = makeStyles({
   empty: { padding: '48px', textAlign: 'center', color: tokens.colorNeutralForeground3 },
   center: { display: 'grid', placeItems: 'center', padding: '48px' },
   rowActions: { display: 'flex', gap: '4px', justifyContent: 'flex-end' },
+  nameLink: {
+    color: tokens.colorBrandForeground1,
+    textDecoration: 'none',
+    fontWeight: tokens.fontWeightSemibold,
+    ':hover': { textDecoration: 'underline' },
+  },
 });
 
 export function ProjectsPage() {
@@ -158,7 +165,9 @@ export function ProjectsPage() {
                   const covered = isCovered(p);
                   return (
                     <tr key={p.id}>
-                      <td className={styles.td}><Text weight="semibold">{p.name}</Text></td>
+                      <td className={styles.td}>
+                        <Link className={styles.nameLink} to={`/projects/${p.id}`}>{p.name}</Link>
+                      </td>
                       <td className={styles.td}>{formatDate(p.startDate)}</td>
                       <td className={styles.td}><PracticeAreaBadge value={p.practiceArea} /></td>
                       <td className={styles.td}><OptionBadge set={projectTypeSet} value={p.projectType} /></td>

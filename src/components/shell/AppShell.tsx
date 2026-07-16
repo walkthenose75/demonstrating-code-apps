@@ -12,6 +12,14 @@ import {
   Board24Filled,
   Money24Regular,
   Money24Filled,
+  DataPie24Regular,
+  DataPie24Filled,
+  PeopleTeam24Regular,
+  PeopleTeam24Filled,
+  ShieldTask24Regular,
+  ShieldTask24Filled,
+  History24Regular,
+  History24Filled,
 } from '@fluentui/react-icons';
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -96,16 +104,48 @@ const items: NavItem[] = [
   { to: '/', label: 'Command Center', icon: <DataArea24Regular />, activeIcon: <DataArea24Filled /> },
   { to: '/projects', label: 'Projects', icon: <Board24Regular />, activeIcon: <Board24Filled /> },
   { to: '/resources', label: 'Resource Library', icon: <Box24Regular />, activeIcon: <Box24Filled /> },
+];
+
+const deliveryItems: NavItem[] = [
+  { to: '/financials', label: 'Financials', icon: <DataPie24Regular />, activeIcon: <DataPie24Filled /> },
+  { to: '/capacity', label: 'Capacity', icon: <PeopleTeam24Regular />, activeIcon: <PeopleTeam24Filled /> },
+  { to: '/raid', label: 'RAID & Governance', icon: <ShieldTask24Regular />, activeIcon: <ShieldTask24Filled /> },
   { to: '/risks', label: 'At-Risk Projects', icon: <Warning24Regular />, activeIcon: <Warning24Filled /> },
-  { to: '/leaderboard', label: 'Leaderboard', icon: <Trophy24Regular />, activeIcon: <Trophy24Filled /> },
 ];
 
 const insightItems: NavItem[] = [
+  { to: '/activity', label: 'Activity', icon: <History24Regular />, activeIcon: <History24Filled /> },
+  { to: '/leaderboard', label: 'Leaderboard', icon: <Trophy24Regular />, activeIcon: <Trophy24Filled /> },
   { to: '/build-cost', label: 'AI Build Cost', icon: <Money24Regular />, activeIcon: <Money24Filled /> },
 ];
 
+const isLive = import.meta.env.VITE_USE_MOCK === 'false';
+
 export function AppShell({ children }: { children: ReactNode }) {
   const styles = useStyles();
+  const renderGroup = (label: string, group: NavItem[]) => (
+    <>
+      <Caption1 className={styles.navLabel}>{label}</Caption1>
+      {group.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          end={item.to === '/'}
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.linkActive}` : styles.link
+          }
+        >
+          {({ isActive }) => (
+            <>
+              {isActive ? item.activeIcon : item.icon}
+              <span>{item.label}</span>
+            </>
+          )}
+        </NavLink>
+      ))}
+    </>
+  );
+
   return (
     <div className={styles.root}>
       <aside className={styles.sidebar}>
@@ -118,45 +158,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Portfolio Intelligence</Caption1>
           </div>
         </div>
-        <Caption1 className={styles.navLabel}>Workspace</Caption1>
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              isActive ? `${styles.link} ${styles.linkActive}` : styles.link
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive ? item.activeIcon : item.icon}
-                <span>{item.label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
-        <Caption1 className={styles.navLabel}>Insights</Caption1>
-        {insightItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              isActive ? `${styles.link} ${styles.linkActive}` : styles.link
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive ? item.activeIcon : item.icon}
-                <span>{item.label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
+        {renderGroup('Workspace', items)}
+        {renderGroup('Delivery', deliveryItems)}
+        {renderGroup('Insights', insightItems)}
         <div className={styles.spacer} />
         <div className={styles.footer}>
-          <Badge appearance="tint" color="informative" size="small">
-            Prototype · mock data
+          <Badge appearance="tint" color={isLive ? 'success' : 'informative'} size="small">
+            {isLive ? 'Live · Dataverse' : 'Prototype · mock data'}
           </Badge>
         </div>
       </aside>
