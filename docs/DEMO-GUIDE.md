@@ -1,8 +1,8 @@
 # Project Tracker — Demo Guide
 
-**Project Tracker** is a Power Apps Code App (Vite + React 18 + TypeScript + Fluent UI v9) that gives a seller organization a live picture of **demo-asset coverage**: which customer demos are backed by reusable assets, where the gaps are, who the top contributors are — and, uniquely, **what it cost in AI to build the app itself**.
+**Project Tracker** is a Power Apps Code App (Vite + React 18 + TypeScript + Fluent UI v9) that gives a team a live picture of **resource coverage**: which client projects are backed by reusable resources, where the at-risk projects are, who the top contributors are — and, uniquely, **what it cost in AI to build the app itself**.
 
-It runs today on a deterministic mock dataset (14 assets, 46 deliveries, a full usage graph) so the entire experience is clickable before a single Dataverse table is provisioned. The provisioning plan to make it live is already written (`dataverse/PROVISIONING.md`).
+It runs today on a deterministic mock dataset (14 resources, 46 projects, a full assignment graph) so the entire experience is clickable before a single Dataverse table is provisioned. The provisioning plan to make it live is already written (`dataverse/PROVISIONING.md`).
 
 ---
 
@@ -28,18 +28,18 @@ npm run build       # prebuild HashRouter check + vite build
 
 | Route | Page | What it shows |
 |---|---|---|
-| `/` | **Coverage Command Center** | Coverage dial, KPI stat cards, monthly trend, activity heatmap, per-solution-area coverage bars, top reused assets |
-| `/deliveries` | **Deliveries** | Searchable/filterable table of demo deliveries; **Log a Demo** dialog (metadata-driven required fields) |
-| `/assets` | **Asset Catalog** | Responsive card grid of demo assets with type/area/maturity badges, reuse counts, staleness |
-| `/assets/:id` | **Asset Detail** | Asset metadata + every delivery that used it |
-| `/gaps` | **Coverage Gaps** | Story-only deliveries grouped by gap reason |
-| `/leaderboard` | **Leaderboard** | Top sellers by coverage; most-reused assets |
+| `/` | **Command Center** | Coverage dial, KPI stat cards, monthly trend, activity heatmap, per-practice-area coverage bars, top reused resources |
+| `/projects` | **Projects** | Searchable/filterable table of projects; **New Project** dialog (metadata-driven required fields) |
+| `/resources` | **Resource Library** | Responsive card grid of resources with type/area/maturity badges, usage counts, staleness |
+| `/resources/:id` | **Resource Detail** | Resource metadata + every project that used it |
+| `/risks` | **At-Risk Projects** | Unresourced projects grouped by risk reason |
+| `/leaderboard` | **Leaderboard** | Top leads by coverage; most-reused resources |
 | `/build-cost` | **AI Build Cost** | The AIC dashboard (below) |
 
 ### Architecture highlights (talking points)
 
 - **Three-layer**: components render → hooks orchestrate (`useCoverageAnalytics`) → services/providers expose contracts → generated services stay behind adapters. Swap the mock provider for the Dataverse provider with no page changes.
-- **Metadata-backed form labels**: the Log-a-Demo dialog renders required-field asterisks from live Dataverse `RequiredLevel` metadata via the shared `DataverseFieldLabel` primitive — no hardcoded `*`.
+- **Metadata-backed form labels**: the New Project dialog renders required-field asterisks from live Dataverse `RequiredLevel` metadata via the shared `DataverseFieldLabel` primitive — no hardcoded `*`.
 - **Code-App-correct**: `HashRouter` (not BrowserRouter), port 3000, relative asset base for the Power Apps iframe, Fluent UI v9 only.
 
 ---
@@ -95,7 +95,7 @@ Location: `~/.copilot/skills/aic-tracker/`
 
 The prototype is backed by a mock provider. To connect real data:
 
-1. Provision the schema per `dataverse/PROVISIONING.md` (3 tables — `dat_demodelivery`, `dat_demoasset`, `dat_demoassetusage` — 7 option sets, 5 relationships).
+1. Provision the schema per `dataverse/PROVISIONING.md` (3 tables — `pt_project`, `pt_resource`, `pt_assignment` — 7 option sets, 5 relationships).
 2. Register the data sources: `pac code add-data-source -a dataverse -t <table>` for each.
 3. Point `createAppDataProvider()` at the Dataverse provider. Pages, hooks, and analytics are unchanged.
 

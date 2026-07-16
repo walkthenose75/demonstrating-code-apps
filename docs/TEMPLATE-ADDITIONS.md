@@ -51,7 +51,7 @@ Install into a fresh clone with `./skills/install.ps1` (or `.sh`).
 
 ## 4. The reference application (`src/`)
 
-A complete, mock-backed **Demo Asset Coverage** app demonstrating the full pattern:
+A complete, mock-backed **Project Tracker** app demonstrating the full pattern:
 
 - **Three-layer architecture** — components render, hooks orchestrate, services/providers expose
   contracts; a swappable mock/Dataverse data provider (`src/services/providerFactory.ts`).

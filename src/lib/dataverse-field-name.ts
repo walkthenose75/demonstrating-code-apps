@@ -3,7 +3,7 @@
 // logical name only for out-of-convention columns (e.g. OOTB attributes).
 // See .github/instructions/09-form-field-pattern.instructions.md.
 
-export const PUBLISHER_PREFIX = 'dat';
+export const PUBLISHER_PREFIX = 'pt';
 
 export function toDataverseFieldName(key: string, explicitLogicalName?: string): string {
   if (explicitLogicalName) return explicitLogicalName;

@@ -1,11 +1,11 @@
 import { makeStyles, tokens, Badge, Caption1, Text } from '@fluentui/react-components';
 import { ArrowRepeatAll16Regular, CalendarLtr16Regular } from '@fluentui/react-icons';
 import { Link } from 'react-router-dom';
-import type { AssetStat } from '@/lib/analytics';
-import { assetTypeSet, maturitySet } from '@/lib/optionSets';
+import type { ResourceStat } from '@/lib/analytics';
+import { resourceTypeSet, maturitySet } from '@/lib/optionSets';
 import { formatDate } from '@/lib/format';
 import { OptionBadge } from '@/components/ui/OptionBadge';
-import { SolutionAreaBadge } from '@/components/ui/SolutionAreaBadge';
+import { PracticeAreaBadge } from '@/components/ui/PracticeAreaBadge';
 
 const useStyles = makeStyles({
   card: {
@@ -47,28 +47,28 @@ const useStyles = makeStyles({
   meta: { display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: tokens.fontWeightSemibold },
 });
 
-export function AssetCard({ asset }: { asset: AssetStat }) {
+export function ResourceCard({ resource }: { resource: ResourceStat }) {
   const styles = useStyles();
   return (
     <div className={styles.card}>
       <div className={styles.head}>
-        <Link to={`/assets/${asset.id}`} className={styles.name}>{asset.name}</Link>
-        {asset.isStale ? <Badge color="warning" appearance="tint">Stale</Badge> : null}
+        <Link to={`/resources/${resource.id}`} className={styles.name}>{resource.name}</Link>
+        {resource.isStale ? <Badge color="warning" appearance="tint">Stale</Badge> : null}
       </div>
       <div className={styles.badges}>
-        <OptionBadge set={assetTypeSet} value={asset.assetType} />
-        <SolutionAreaBadge value={asset.solutionArea} />
-        <OptionBadge set={maturitySet} value={asset.maturity} />
+        <OptionBadge set={resourceTypeSet} value={resource.resourceType} />
+        <PracticeAreaBadge value={resource.practiceArea} />
+        <OptionBadge set={maturitySet} value={resource.maturity} />
       </div>
-      {asset.description ? <Text className={styles.desc}>{asset.description}</Text> : null}
+      {resource.description ? <Text className={styles.desc}>{resource.description}</Text> : null}
       <div className={styles.footer}>
         <span className={styles.meta}>
           <ArrowRepeatAll16Regular />
-          {asset.reuse} {asset.reuse === 1 ? 'reuse' : 'reuses'}
+          {resource.reuse} {resource.reuse === 1 ? 'use' : 'uses'}
         </span>
         <Caption1 style={{ color: tokens.colorNeutralForeground3, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
           <CalendarLtr16Regular />
-          {asset.lastUsedOn ? formatDate(asset.lastUsedOn) : 'Never'}
+          {resource.lastUsedOn ? formatDate(resource.lastUsedOn) : 'Never'}
         </Caption1>
       </div>
     </div>

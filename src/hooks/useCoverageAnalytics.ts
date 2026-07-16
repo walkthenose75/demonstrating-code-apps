@@ -2,48 +2,48 @@
 // Keeps pages thin: a page calls this once and renders the result.
 
 import { useMemo } from 'react';
-import { useDemoDeliveries, useDemoAssets, useDemoAssetUsages } from '@/hooks/usePrototypeData';
+import { useProjects, useResources, useAssignments } from '@/hooks/usePrototypeData';
 import {
   coverageSummary,
   coverageByArea,
   coverageTrend,
-  sellerLeaderboard,
-  assetLeaderboard,
-  gapBacklog,
+  leadLeaderboard,
+  resourceLeaderboard,
+  riskBacklog,
   activityHeatmap,
   maxHeat,
 } from '@/lib/analytics';
-import type { DemoDelivery, DemoAsset, DemoAssetUsage } from '@/types/domain-models';
+import type { Project, Resource, Assignment } from '@/types/domain-models';
 
 export function useCoverageAnalytics() {
-  const deliveriesQ = useDemoDeliveries();
-  const assetsQ = useDemoAssets();
-  const usagesQ = useDemoAssetUsages();
+  const projectsQ = useProjects();
+  const resourcesQ = useResources();
+  const assignmentsQ = useAssignments();
 
-  const deliveries: DemoDelivery[] = useMemo(() => deliveriesQ.data ?? [], [deliveriesQ.data]);
-  const assets: DemoAsset[] = useMemo(() => assetsQ.data ?? [], [assetsQ.data]);
-  const usages: DemoAssetUsage[] = useMemo(() => usagesQ.data ?? [], [usagesQ.data]);
+  const projects: Project[] = useMemo(() => projectsQ.data ?? [], [projectsQ.data]);
+  const resources: Resource[] = useMemo(() => resourcesQ.data ?? [], [resourcesQ.data]);
+  const assignments: Assignment[] = useMemo(() => assignmentsQ.data ?? [], [assignmentsQ.data]);
 
   const analytics = useMemo(() => {
-    const heatmap = activityHeatmap(deliveries);
+    const heatmap = activityHeatmap(projects);
     return {
-      summary: coverageSummary(deliveries),
-      byArea: coverageByArea(deliveries),
-      trend: coverageTrend(deliveries),
-      sellers: sellerLeaderboard(deliveries),
-      topAssets: assetLeaderboard(assets),
-      gaps: gapBacklog(deliveries),
+      summary: coverageSummary(projects),
+      byArea: coverageByArea(projects),
+      trend: coverageTrend(projects),
+      leads: leadLeaderboard(projects),
+      topResources: resourceLeaderboard(resources),
+      gaps: riskBacklog(projects),
       heatmap,
       heatMax: maxHeat(heatmap),
     };
-  }, [deliveries, assets]);
+  }, [projects, resources]);
 
   return {
-    isLoading: deliveriesQ.isLoading || assetsQ.isLoading || usagesQ.isLoading,
-    isError: deliveriesQ.isError || assetsQ.isError || usagesQ.isError,
-    deliveries,
-    assets,
-    usages,
+    isLoading: projectsQ.isLoading || resourcesQ.isLoading || assignmentsQ.isLoading,
+    isError: projectsQ.isError || resourcesQ.isError || assignmentsQ.isError,
+    projects,
+    resources,
+    assignments,
     ...analytics,
   };
 }

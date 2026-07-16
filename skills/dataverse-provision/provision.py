@@ -30,7 +30,7 @@ Auth modes (choose with --auth):
 Usage:
   python provision.py --dry-run
   python provision.py --url https://org.crm.dynamics.com --auth devicecode \
-      --tenant contoso.onmicrosoft.com --solution DemoAssetTracker --yes
+      --tenant contoso.onmicrosoft.com --solution ProjectTracker --yes
 """
 from __future__ import annotations
 

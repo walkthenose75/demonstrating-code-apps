@@ -18,11 +18,11 @@ import {
 import type { DialogOpenChangeData, DialogOpenChangeEvent } from '@fluentui/react-components';
 import { DataverseFieldLabel, useDataverseFieldRequired } from '@/components/ui/DataverseFieldLabel';
 import { toDataverseFieldName } from '@/lib/dataverse-field-name';
-import { solutionAreaSet, deliveryFormatSet } from '@/lib/optionSets';
-import { mockCustomers, mockSellers } from '@/mockData/reference';
-import { useSaveDemoDelivery } from '@/hooks/usePrototypeData';
+import { practiceAreaSet, projectTypeSet } from '@/lib/optionSets';
+import { mockClients, mockTeamMembers } from '@/mockData/reference';
+import { useSaveProject } from '@/hooks/usePrototypeData';
 
-const TABLE = 'dat_demodelivery';
+const TABLE = 'pt_project';
 
 const useStyles = makeStyles({
   form: { display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '4px' },
@@ -66,35 +66,35 @@ function Field({ field, label, children, error }: FieldProps) {
   );
 }
 
-export function LogDemoDialog({ open, onOpenChange }: Props) {
+export function LogProjectDialog({ open, onOpenChange }: Props) {
   const styles = useStyles();
-  const save = useSaveDemoDelivery();
+  const save = useSaveProject();
 
   const [name, setName] = useState('');
-  const [deliveryDate, setDeliveryDate] = useState('');
-  const [solutionArea, setSolutionArea] = useState<number | undefined>();
-  const [customer, setCustomer] = useState<string | undefined>();
-  const [presenter, setPresenter] = useState<string | undefined>();
-  const [deliveryFormat, setDeliveryFormat] = useState<number | undefined>();
-  const [audienceSize, setAudienceSize] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [practiceArea, setPracticeArea] = useState<number | undefined>();
+  const [client, setClient] = useState<string | undefined>();
+  const [projectLead, setProjectLead] = useState<string | undefined>();
+  const [projectType, setProjectType] = useState<number | undefined>();
+  const [teamSize, setTeamSize] = useState('');
   const [showErrors, setShowErrors] = useState(false);
 
   function reset() {
     setName('');
-    setDeliveryDate('');
-    setSolutionArea(undefined);
-    setCustomer(undefined);
-    setPresenter(undefined);
-    setDeliveryFormat(undefined);
-    setAudienceSize('');
+    setStartDate('');
+    setPracticeArea(undefined);
+    setClient(undefined);
+    setProjectLead(undefined);
+    setProjectType(undefined);
+    setTeamSize('');
     setShowErrors(false);
   }
 
   const missingName = !name.trim();
-  const missingDate = !deliveryDate;
-  const missingArea = solutionArea === undefined;
-  const missingCustomer = !customer;
-  const invalid = missingName || missingDate || missingArea || missingCustomer;
+  const missingDate = !startDate;
+  const missingArea = practiceArea === undefined;
+  const missingClient = !client;
+  const invalid = missingName || missingDate || missingArea || missingClient;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -103,15 +103,15 @@ export function LogDemoDialog({ open, onOpenChange }: Props) {
       return;
     }
     await save.mutateAsync({
-      id: `delivery-${Date.now()}`,
+      id: `project-${Date.now()}`,
       name: name.trim(),
-      deliveryDate,
-      solutionArea: solutionArea!,
-      customer,
-      presenter,
-      deliveryFormat,
-      audienceSize: audienceSize ? Number(audienceSize) : undefined,
-      linkedAssetCount: 0,
+      startDate,
+      practiceArea: practiceArea!,
+      client,
+      projectLead,
+      projectType,
+      teamSize: teamSize ? Number(teamSize) : undefined,
+      resourceCount: 0,
     });
     reset();
     onOpenChange(false);
@@ -129,92 +129,92 @@ export function LogDemoDialog({ open, onOpenChange }: Props) {
       <DialogSurface aria-describedby={undefined}>
         <form onSubmit={handleSubmit}>
           <DialogBody>
-            <DialogTitle>Log a Demo</DialogTitle>
+            <DialogTitle>New Project</DialogTitle>
             <DialogContent>
               <div className={styles.form}>
-                <Field field="name" label="Delivery Name" error={err(missingName, 'Delivery name is required.')}>
+                <Field field="name" label="Project Name" error={err(missingName, 'Project name is required.')}>
                   {(id, required) => (
-                    <Input id={id} value={name} onChange={(_e, d) => setName(d.value)} aria-required={required || undefined} placeholder="e.g. Contoso Azure Landing Zone demo" />
+                    <Input id={id} value={name} onChange={(_e, d) => setName(d.value)} aria-required={required || undefined} placeholder="e.g. NovaMed 510(k) submission program" />
                   )}
                 </Field>
 
-                <Field field="deliverydate" label="Delivery Date" error={err(missingDate, 'Delivery date is required.')}>
+                <Field field="startdate" label="Start Date" error={err(missingDate, 'Start date is required.')}>
                   {(id, required) => (
-                    <input id={id} type="date" className={styles.input} value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} aria-required={required || undefined} />
+                    <input id={id} type="date" className={styles.input} value={startDate} onChange={(e) => setStartDate(e.target.value)} aria-required={required || undefined} />
                   )}
                 </Field>
 
-                <Field field="solutionarea" label="Solution Area" error={err(missingArea, 'Solution area is required.')}>
+                <Field field="practicearea" label="Practice Area" error={err(missingArea, 'Practice area is required.')}>
                   {(id, required) => (
                     <Dropdown
                       id={id}
                       aria-required={required || undefined}
-                      placeholder="Select a solution area"
-                      selectedOptions={solutionArea !== undefined ? [String(solutionArea)] : []}
-                      value={solutionAreaSet.options.find((o) => o.value === solutionArea)?.label ?? ''}
-                      onOptionSelect={(_e, d) => setSolutionArea(d.optionValue ? Number(d.optionValue) : undefined)}
+                      placeholder="Select a practice area"
+                      selectedOptions={practiceArea !== undefined ? [String(practiceArea)] : []}
+                      value={practiceAreaSet.options.find((o) => o.value === practiceArea)?.label ?? ''}
+                      onOptionSelect={(_e, d) => setPracticeArea(d.optionValue ? Number(d.optionValue) : undefined)}
                     >
-                      {solutionAreaSet.options.map((o) => (
+                      {practiceAreaSet.options.map((o) => (
                         <Option key={o.value} value={String(o.value)}>{o.label}</Option>
                       ))}
                     </Dropdown>
                   )}
                 </Field>
 
-                <Field field="customer" label="Customer" error={err(missingCustomer, 'Customer is required.')}>
+                <Field field="client" label="Client" error={err(missingClient, 'Client is required.')}>
                   {(id, required) => (
                     <Dropdown
                       id={id}
                       aria-required={required || undefined}
-                      placeholder="Select a customer"
-                      selectedOptions={customer ? [customer] : []}
-                      value={mockCustomers.find((c) => c.id === customer)?.name ?? ''}
-                      onOptionSelect={(_e, d) => setCustomer(d.optionValue)}
+                      placeholder="Select a client"
+                      selectedOptions={client ? [client] : []}
+                      value={mockClients.find((c) => c.id === client)?.name ?? ''}
+                      onOptionSelect={(_e, d) => setClient(d.optionValue)}
                     >
-                      {mockCustomers.map((c) => (
+                      {mockClients.map((c) => (
                         <Option key={c.id} value={c.id}>{c.name}</Option>
                       ))}
                     </Dropdown>
                   )}
                 </Field>
 
-                <Field field="presenter" label="Presenter">
+                <Field field="projectlead" label="Project Lead">
                   {(id, required) => (
                     <Dropdown
                       id={id}
                       aria-required={required || undefined}
-                      placeholder="Select a presenter"
-                      selectedOptions={presenter ? [presenter] : []}
-                      value={mockSellers.find((s) => s.id === presenter)?.name ?? ''}
-                      onOptionSelect={(_e, d) => setPresenter(d.optionValue)}
+                      placeholder="Select a project lead"
+                      selectedOptions={projectLead ? [projectLead] : []}
+                      value={mockTeamMembers.find((s) => s.id === projectLead)?.name ?? ''}
+                      onOptionSelect={(_e, d) => setProjectLead(d.optionValue)}
                     >
-                      {mockSellers.map((s) => (
+                      {mockTeamMembers.map((s) => (
                         <Option key={s.id} value={s.id}>{s.name}</Option>
                       ))}
                     </Dropdown>
                   )}
                 </Field>
 
-                <Field field="deliveryformat" label="Delivery Format">
+                <Field field="projecttype" label="Project Type">
                   {(id, required) => (
                     <Dropdown
                       id={id}
                       aria-required={required || undefined}
-                      placeholder="Select a format"
-                      selectedOptions={deliveryFormat !== undefined ? [String(deliveryFormat)] : []}
-                      value={deliveryFormatSet.options.find((o) => o.value === deliveryFormat)?.label ?? ''}
-                      onOptionSelect={(_e, d) => setDeliveryFormat(d.optionValue ? Number(d.optionValue) : undefined)}
+                      placeholder="Select a type"
+                      selectedOptions={projectType !== undefined ? [String(projectType)] : []}
+                      value={projectTypeSet.options.find((o) => o.value === projectType)?.label ?? ''}
+                      onOptionSelect={(_e, d) => setProjectType(d.optionValue ? Number(d.optionValue) : undefined)}
                     >
-                      {deliveryFormatSet.options.map((o) => (
+                      {projectTypeSet.options.map((o) => (
                         <Option key={o.value} value={String(o.value)}>{o.label}</Option>
                       ))}
                     </Dropdown>
                   )}
                 </Field>
 
-                <Field field="audiencesize" label="Audience Size">
+                <Field field="teamsize" label="Team Size">
                   {(id, required) => (
-                    <Input id={id} type="number" min={0} value={audienceSize} onChange={(_e, d) => setAudienceSize(d.value)} aria-required={required || undefined} placeholder="e.g. 12" />
+                    <Input id={id} type="number" min={0} value={teamSize} onChange={(_e, d) => setTeamSize(d.value)} aria-required={required || undefined} placeholder="e.g. 8" />
                   )}
                 </Field>
               </div>
@@ -222,7 +222,7 @@ export function LogDemoDialog({ open, onOpenChange }: Props) {
             <DialogActions>
               <Button appearance="secondary" type="button" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button appearance="primary" type="submit" disabled={invalid || save.isPending}>
-                {save.isPending ? 'Saving…' : 'Log delivery'}
+                {save.isPending ? 'Saving…' : 'Create project'}
               </Button>
             </DialogActions>
           </DialogBody>

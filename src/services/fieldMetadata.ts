@@ -54,32 +54,32 @@ interface FieldSeed {
 // Keyed by table logical name → field logical name. Mirrors the RequiredLevel
 // in dataverse/planning-payload.json for the three custom tables.
 const registry: Record<string, Record<string, FieldSeed>> = {
-  dat_demodelivery: {
-    dat_name: { displayName: 'Delivery Name', requiredLevel: 'system' },
-    dat_deliverydate: { displayName: 'Delivery Date', requiredLevel: 'application' },
-    dat_solutionarea: { displayName: 'Solution Area', requiredLevel: 'application' },
-    dat_customer: { displayName: 'Customer', requiredLevel: 'application' },
-    dat_presenter: { displayName: 'Presenter', requiredLevel: 'recommended' },
-    dat_deliveryformat: { displayName: 'Delivery Format', requiredLevel: 'none' },
-    dat_salesstage: { displayName: 'Sales Stage', requiredLevel: 'none' },
-    dat_outcome: { displayName: 'Outcome', requiredLevel: 'none' },
-    dat_audiencesize: { displayName: 'Audience Size', requiredLevel: 'none' },
-    dat_assetgapreason: { displayName: 'Asset Gap Reason', requiredLevel: 'none' },
+  pt_project: {
+    pt_name: { displayName: 'Project Name', requiredLevel: 'system' },
+    pt_startdate: { displayName: 'Start Date', requiredLevel: 'application' },
+    pt_practicearea: { displayName: 'Practice Area', requiredLevel: 'application' },
+    pt_client: { displayName: 'Client', requiredLevel: 'application' },
+    pt_projectlead: { displayName: 'Project Lead', requiredLevel: 'recommended' },
+    pt_projecttype: { displayName: 'Project Type', requiredLevel: 'none' },
+    pt_status: { displayName: 'Status', requiredLevel: 'none' },
+    pt_outcome: { displayName: 'Outcome', requiredLevel: 'none' },
+    pt_teamsize: { displayName: 'Team Size', requiredLevel: 'none' },
+    pt_riskreason: { displayName: 'Risk Reason', requiredLevel: 'none' },
   },
-  dat_demoasset: {
-    dat_name: { displayName: 'Asset Name', requiredLevel: 'system' },
-    dat_assettype: { displayName: 'Asset Type', requiredLevel: 'application' },
-    dat_solutionarea: { displayName: 'Solution Area', requiredLevel: 'application' },
-    dat_maturity: { displayName: 'Maturity', requiredLevel: 'recommended' },
-    dat_asseturl: { displayName: 'Asset URL', requiredLevel: 'none' },
-    dat_description: { displayName: 'Description', requiredLevel: 'none' },
-    dat_maintainer: { displayName: 'Maintainer', requiredLevel: 'recommended' },
+  pt_resource: {
+    pt_name: { displayName: 'Resource Name', requiredLevel: 'system' },
+    pt_resourcetype: { displayName: 'Resource Type', requiredLevel: 'application' },
+    pt_practicearea: { displayName: 'Practice Area', requiredLevel: 'application' },
+    pt_maturity: { displayName: 'Maturity', requiredLevel: 'recommended' },
+    pt_resourceurl: { displayName: 'Resource URL', requiredLevel: 'none' },
+    pt_description: { displayName: 'Description', requiredLevel: 'none' },
+    pt_owner: { displayName: 'Owner', requiredLevel: 'recommended' },
   },
-  dat_demoassetusage: {
-    dat_name: { displayName: 'Usage Name', requiredLevel: 'system' },
-    dat_demodelivery: { displayName: 'Demo Delivery', requiredLevel: 'application' },
-    dat_demoasset: { displayName: 'Demo Asset', requiredLevel: 'application' },
-    dat_usagenote: { displayName: 'Usage Note', requiredLevel: 'none' },
+  pt_assignment: {
+    pt_name: { displayName: 'Assignment Name', requiredLevel: 'system' },
+    pt_project: { displayName: 'Project', requiredLevel: 'application' },
+    pt_resource: { displayName: 'Resource', requiredLevel: 'application' },
+    pt_assignmentnote: { displayName: 'Assignment Note', requiredLevel: 'none' },
   },
 };
 

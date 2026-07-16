@@ -1,14 +1,15 @@
-// Pure analytics over the demo-asset domain. No React, no Fluent — fully testable.
-// Coverage is delivery-centric (a delivery is "covered" when it has >=1 linked
-// asset); Reuse is asset-centric (how many deliveries a single asset backed).
+// Pure analytics over the project-portfolio domain. No React, no Fluent — fully
+// testable. Coverage is project-centric (a project is "covered"/resourced when it
+// has >=1 linked resource); Usage is resource-centric (how many projects a single
+// resource backed). "Coverage" is retained as a portfolio term for resourced work.
 
-import type { DemoAsset, DemoAssetUsage, DemoDelivery } from '@/types/domain-models';
-import { solutionAreaSet, assetGapReasonSet, labelOf, colorOf } from '@/lib/optionSets';
-import { seller, sellerName } from '@/mockData/reference';
+import type { Resource, Assignment, Project } from '@/types/domain-models';
+import { practiceAreaSet, riskReasonSet, labelOf, colorOf } from '@/lib/optionSets';
+import { teamMember, leadName } from '@/mockData/reference';
 import { daysSince, isoDate, pct } from '@/lib/format';
 
-export function isCovered(d: DemoDelivery): boolean {
-  return (d.linkedAssetCount ?? 0) > 0;
+export function isCovered(p: Project): boolean {
+  return (p.resourceCount ?? 0) > 0;
 }
 
 export interface CoverageSummary {
@@ -18,9 +19,9 @@ export interface CoverageSummary {
   coveragePct: number;
 }
 
-export function coverageSummary(deliveries: DemoDelivery[]): CoverageSummary {
-  const total = deliveries.length;
-  const covered = deliveries.filter(isCovered).length;
+export function coverageSummary(projects: Project[]): CoverageSummary {
+  const total = projects.length;
+  const covered = projects.filter(isCovered).length;
   return { total, covered, storyOnly: total - covered, coveragePct: pct(covered, total) };
 }
 
@@ -33,10 +34,10 @@ export interface AreaCoverage {
   coveragePct: number;
 }
 
-export function coverageByArea(deliveries: DemoDelivery[]): AreaCoverage[] {
-  return solutionAreaSet.options
+export function coverageByArea(projects: Project[]): AreaCoverage[] {
+  return practiceAreaSet.options
     .map((opt) => {
-      const inArea = deliveries.filter((d) => d.solutionArea === opt.value);
+      const inArea = projects.filter((p) => p.practiceArea === opt.value);
       const covered = inArea.filter(isCovered).length;
       return {
         area: opt.value,
@@ -59,13 +60,13 @@ export interface MonthlyCoverage {
   coveragePct: number;
 }
 
-export function coverageTrend(deliveries: DemoDelivery[]): MonthlyCoverage[] {
+export function coverageTrend(projects: Project[]): MonthlyCoverage[] {
   const buckets = new Map<string, { total: number; covered: number }>();
-  for (const d of deliveries) {
-    const month = d.deliveryDate.slice(0, 7);
+  for (const p of projects) {
+    const month = p.startDate.slice(0, 7);
     const b = buckets.get(month) ?? { total: 0, covered: 0 };
     b.total += 1;
-    if (isCovered(d)) b.covered += 1;
+    if (isCovered(p)) b.covered += 1;
     buckets.set(month, b);
   }
   return [...buckets.entries()]
@@ -79,37 +80,37 @@ export function coverageTrend(deliveries: DemoDelivery[]): MonthlyCoverage[] {
     }));
 }
 
-export interface SellerStat {
-  sellerId: string;
+export interface LeadStat {
+  leadId: string;
   name: string;
   initials: string;
-  deliveries: number;
+  projects: number;
   covered: number;
   coveragePct: number;
 }
 
-export function sellerLeaderboard(deliveries: DemoDelivery[]): SellerStat[] {
-  const byId = new Map<string, { deliveries: number; covered: number }>();
-  for (const d of deliveries) {
-    const id = d.presenter ?? 'unassigned';
-    const s = byId.get(id) ?? { deliveries: 0, covered: 0 };
-    s.deliveries += 1;
-    if (isCovered(d)) s.covered += 1;
+export function leadLeaderboard(projects: Project[]): LeadStat[] {
+  const byId = new Map<string, { projects: number; covered: number }>();
+  for (const p of projects) {
+    const id = p.projectLead ?? 'unassigned';
+    const s = byId.get(id) ?? { projects: 0, covered: 0 };
+    s.projects += 1;
+    if (isCovered(p)) s.covered += 1;
     byId.set(id, s);
   }
   return [...byId.entries()]
-    .map(([sellerId, s]) => ({
-      sellerId,
-      name: sellerName(sellerId),
-      initials: seller(sellerId)?.initials ?? '—',
-      deliveries: s.deliveries,
+    .map(([leadId, s]) => ({
+      leadId,
+      name: leadName(leadId),
+      initials: teamMember(leadId)?.initials ?? '—',
+      projects: s.projects,
       covered: s.covered,
-      coveragePct: pct(s.covered, s.deliveries),
+      coveragePct: pct(s.covered, s.projects),
     }))
-    .sort((a, b) => b.deliveries - a.deliveries || b.coveragePct - a.coveragePct);
+    .sort((a, b) => b.projects - a.projects || b.coveragePct - a.coveragePct);
 }
 
-export interface AssetStat extends DemoAsset {
+export interface ResourceStat extends Resource {
   reuse: number;
   staleDays?: number;
   isStale: boolean;
@@ -117,15 +118,15 @@ export interface AssetStat extends DemoAsset {
 
 const STALE_THRESHOLD_DAYS = 90;
 
-export function assetLeaderboard(assets: DemoAsset[]): AssetStat[] {
-  return assets
-    .map((a) => {
-      const staleDays = daysSince(a.lastUsedOn);
+export function resourceLeaderboard(resources: Resource[]): ResourceStat[] {
+  return resources
+    .map((r) => {
+      const staleDays = daysSince(r.lastUsedOn);
       return {
-        ...a,
-        reuse: a.reuseCount ?? 0,
+        ...r,
+        reuse: r.usageCount ?? 0,
         staleDays,
-        isStale: (a.reuseCount ?? 0) === 0 || (staleDays !== undefined && staleDays > STALE_THRESHOLD_DAYS),
+        isStale: (r.usageCount ?? 0) === 0 || (staleDays !== undefined && staleDays > STALE_THRESHOLD_DAYS),
       };
     })
     .sort((a, b) => b.reuse - a.reuse || a.name.localeCompare(b.name));
@@ -135,22 +136,22 @@ export interface GapBucket {
   reason: number;
   label: string;
   color: string;
-  deliveries: DemoDelivery[];
+  projects: Project[];
 }
 
-export function gapBacklog(deliveries: DemoDelivery[]): GapBucket[] {
-  const storyOnly = deliveries.filter((d) => !isCovered(d));
-  return assetGapReasonSet.options
+export function riskBacklog(projects: Project[]): GapBucket[] {
+  const storyOnly = projects.filter((p) => !isCovered(p));
+  return riskReasonSet.options
     .map((opt) => ({
       reason: opt.value,
       label: opt.label,
       color: opt.color,
-      deliveries: storyOnly
-        .filter((d) => d.assetGapReason === opt.value)
-        .sort((a, b) => (a.deliveryDate < b.deliveryDate ? 1 : -1)),
+      projects: storyOnly
+        .filter((p) => p.riskReason === opt.value)
+        .sort((a, b) => (a.startDate < b.startDate ? 1 : -1)),
     }))
-    .filter((b) => b.deliveries.length > 0)
-    .sort((a, b) => b.deliveries.length - a.deliveries.length);
+    .filter((b) => b.projects.length > 0)
+    .sort((a, b) => b.projects.length - a.projects.length);
 }
 
 export interface HeatCell {
@@ -159,9 +160,9 @@ export interface HeatCell {
 }
 
 /** Weeks (columns) x 7 days (rows, Sun..Sat) ending today, for a GitHub-style heatmap. */
-export function activityHeatmap(deliveries: DemoDelivery[], weeks = 26): HeatCell[][] {
+export function activityHeatmap(projects: Project[], weeks = 26): HeatCell[][] {
   const counts = new Map<string, number>();
-  for (const d of deliveries) counts.set(d.deliveryDate, (counts.get(d.deliveryDate) ?? 0) + 1);
+  for (const p of projects) counts.set(p.startDate, (counts.get(p.startDate) ?? 0) + 1);
 
   const today = new Date();
   const end = new Date(today);
@@ -189,45 +190,45 @@ export function maxHeat(grid: HeatCell[][]): number {
 }
 
 // ── Faceted filtering ───────────────────────────────────────────────────────
-export interface DeliveryFilter {
+export interface ProjectFilter {
   search?: string;
   area?: number | null;
-  format?: number | null;
-  sellerId?: string | null;
+  type?: number | null;
+  leadId?: string | null;
   coverage?: 'all' | 'covered' | 'story';
 }
 
-export function filterDeliveries(deliveries: DemoDelivery[], filter: DeliveryFilter): DemoDelivery[] {
+export function filterProjects(projects: Project[], filter: ProjectFilter): Project[] {
   const search = filter.search?.trim().toLowerCase();
-  return deliveries.filter((d) => {
-    if (search && !d.name.toLowerCase().includes(search)) return false;
-    if (filter.area != null && d.solutionArea !== filter.area) return false;
-    if (filter.format != null && d.deliveryFormat !== filter.format) return false;
-    if (filter.sellerId && d.presenter !== filter.sellerId) return false;
-    if (filter.coverage === 'covered' && !isCovered(d)) return false;
-    if (filter.coverage === 'story' && isCovered(d)) return false;
+  return projects.filter((p) => {
+    if (search && !p.name.toLowerCase().includes(search)) return false;
+    if (filter.area != null && p.practiceArea !== filter.area) return false;
+    if (filter.type != null && p.projectType !== filter.type) return false;
+    if (filter.leadId && p.projectLead !== filter.leadId) return false;
+    if (filter.coverage === 'covered' && !isCovered(p)) return false;
+    if (filter.coverage === 'story' && isCovered(p)) return false;
     return true;
   });
 }
 
-/** Deliveries that reused a given asset, via the usage graph. */
-export function deliveriesForAsset(
-  assetId: string,
-  usages: DemoAssetUsage[],
-  deliveries: DemoDelivery[],
-): DemoDelivery[] {
-  const ids = new Set(usages.filter((u) => u.demoAsset === assetId).map((u) => u.demoDelivery));
-  return deliveries.filter((d) => ids.has(d.id)).sort((a, b) => (a.deliveryDate < b.deliveryDate ? 1 : -1));
+/** Projects that used a given resource, via the assignment graph. */
+export function projectsForResource(
+  resourceId: string,
+  assignments: Assignment[],
+  projects: Project[],
+): Project[] {
+  const ids = new Set(assignments.filter((u) => u.resource === resourceId).map((u) => u.project));
+  return projects.filter((p) => ids.has(p.id)).sort((a, b) => (a.startDate < b.startDate ? 1 : -1));
 }
 
-/** Assets linked to a given delivery, via the usage graph. */
-export function assetsForDelivery(
-  deliveryId: string,
-  usages: DemoAssetUsage[],
-  assets: DemoAsset[],
-): DemoAsset[] {
-  const ids = new Set(usages.filter((u) => u.demoDelivery === deliveryId).map((u) => u.demoAsset));
-  return assets.filter((a) => ids.has(a.id));
+/** Resources linked to a given project, via the assignment graph. */
+export function resourcesForProject(
+  projectId: string,
+  assignments: Assignment[],
+  resources: Resource[],
+): Resource[] {
+  const ids = new Set(assignments.filter((u) => u.project === projectId).map((u) => u.resource));
+  return resources.filter((r) => ids.has(r.id));
 }
 
 export { labelOf, colorOf };

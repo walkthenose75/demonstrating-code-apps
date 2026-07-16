@@ -94,9 +94,9 @@ interface NavItem {
 
 const items: NavItem[] = [
   { to: '/', label: 'Command Center', icon: <DataArea24Regular />, activeIcon: <DataArea24Filled /> },
-  { to: '/deliveries', label: 'Deliveries', icon: <Board24Regular />, activeIcon: <Board24Filled /> },
-  { to: '/assets', label: 'Asset Catalog', icon: <Box24Regular />, activeIcon: <Box24Filled /> },
-  { to: '/gaps', label: 'Coverage Gaps', icon: <Warning24Regular />, activeIcon: <Warning24Filled /> },
+  { to: '/projects', label: 'Projects', icon: <Board24Regular />, activeIcon: <Board24Filled /> },
+  { to: '/resources', label: 'Resource Library', icon: <Box24Regular />, activeIcon: <Box24Filled /> },
+  { to: '/risks', label: 'At-Risk Projects', icon: <Warning24Regular />, activeIcon: <Warning24Filled /> },
   { to: '/leaderboard', label: 'Leaderboard', icon: <Trophy24Regular />, activeIcon: <Trophy24Filled /> },
 ];
 
@@ -115,7 +115,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Text weight="bold" size={400}>
               Project Tracker
             </Text>
-            <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Demo Asset Intelligence</Caption1>
+            <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Portfolio Intelligence</Caption1>
           </div>
         </div>
         <Caption1 className={styles.navLabel}>Workspace</Caption1>

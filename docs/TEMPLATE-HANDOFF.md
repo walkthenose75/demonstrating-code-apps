@@ -38,12 +38,12 @@ Node.js, .NET SDK, PAC CLI, Git, Python 3. For Dataverse work also:
 Edit `.env` and `power.config.json`:
 
 - `PP_ENV_DEV` / `PP_ENV_TEST` / `PP_ENV_PROD` — your environment URLs.
-- `PP_PUBLISHER_PREFIX` — **choose your own 2–8 char prefix** (this template uses `dat`). It is
+- `PP_PUBLISHER_PREFIX` — **choose your own 2–8 char prefix** (this template uses `pt`). It is
   **immutable once data exists** — decide deliberately and record it in `docs/adr/`.
 - `power.config.json` — `appId` / `environmentId` are set on first `pac code init` / `pac code push`.
 
-> If you keep the reference app, a global find/replace of `dat_` → `<yourprefix>_` across
-> `src/lib/optionSets.ts`, `dataverse/planning-payload.json`, and generated types is required.
+> If you keep the reference app, a global find/replace of `pt_` → `<yourprefix>_` across
+> `src/lib/dataverse-field-name.ts`, `dataverse/planning-payload.json`, and generated types is required.
 > Easier for a brand-new app: delete the reference pages and start the planning flow fresh.
 
 ## 5. Plan first (the whole point of this template)

@@ -24,96 +24,96 @@ function makeLookup(set: OptionSet) {
   return byValue;
 }
 
-export const solutionAreaSet: OptionSet = {
-  logicalName: 'dat_solutionarea',
-  displayName: 'Solution Area',
+export const practiceAreaSet: OptionSet = {
+  logicalName: 'pt_practicearea',
+  displayName: 'Practice Area',
   options: [
-    { value: 100000000, label: 'Azure Infrastructure', color: '#0f6cbd', short: 'Azure' },
-    { value: 100000001, label: 'Data & AI', color: '#8764b8', short: 'Data & AI' },
-    { value: 100000002, label: 'Security', color: '#c50f1f', short: 'Security' },
-    { value: 100000003, label: 'Modern Work', color: '#107c10', short: 'Modern Work' },
-    { value: 100000004, label: 'Business Applications', color: '#ca5010', short: 'Biz Apps' },
-    { value: 100000005, label: 'Copilot', color: '#5c2e91', short: 'Copilot' },
-    { value: 100000006, label: 'Other', color: '#616161', short: 'Other' },
+    { value: 100000000, label: 'Product Development', color: '#0f6cbd', short: 'Product' },
+    { value: 100000001, label: 'Regulatory & Compliance', color: '#c50f1f', short: 'Regulatory' },
+    { value: 100000002, label: 'Clinical & Quality', color: '#107c10', short: 'Clinical' },
+    { value: 100000003, label: 'Manufacturing & Supply', color: '#ca5010', short: 'Manufacturing' },
+    { value: 100000004, label: 'Commercial', color: '#8764b8', short: 'Commercial' },
+    { value: 100000005, label: 'IT & Digital', color: '#5c2e91', short: 'IT & Digital' },
+    { value: 100000006, label: 'Operations', color: '#616161', short: 'Operations' },
   ],
 };
 
-export const deliveryFormatSet: OptionSet = {
-  logicalName: 'dat_deliveryformat',
-  displayName: 'Delivery Format',
+export const projectTypeSet: OptionSet = {
+  logicalName: 'pt_projecttype',
+  displayName: 'Project Type',
   options: [
-    { value: 100000000, label: 'In-person', color: '#0f6cbd' },
-    { value: 100000001, label: 'Remote', color: '#8764b8' },
-    { value: 100000002, label: 'Event / Booth', color: '#ca5010' },
-    { value: 100000003, label: 'Hybrid', color: '#107c10' },
+    { value: 100000000, label: 'Internal Initiative', color: '#0f6cbd' },
+    { value: 100000001, label: 'Client Engagement', color: '#8764b8' },
+    { value: 100000002, label: 'Research Study', color: '#107c10' },
+    { value: 100000003, label: 'Compliance Program', color: '#ca5010' },
   ],
 };
 
-export const salesStageSet: OptionSet = {
-  logicalName: 'dat_deliverystage',
-  displayName: 'Sales Stage',
+export const statusSet: OptionSet = {
+  logicalName: 'pt_status',
+  displayName: 'Status',
   options: [
-    { value: 100000000, label: 'Discovery', color: '#616161' },
-    { value: 100000001, label: 'Technical Validation', color: '#0f6cbd' },
-    { value: 100000002, label: 'Proof of Concept', color: '#8764b8' },
-    { value: 100000003, label: 'Executive Briefing', color: '#107c10' },
+    { value: 100000000, label: 'Planning', color: '#616161' },
+    { value: 100000001, label: 'In Progress', color: '#0f6cbd' },
+    { value: 100000002, label: 'In Review', color: '#8764b8' },
+    { value: 100000003, label: 'Complete', color: '#107c10' },
   ],
 };
 
 export const outcomeSet: OptionSet = {
-  logicalName: 'dat_outcome',
+  logicalName: 'pt_outcome',
   displayName: 'Outcome',
   options: [
-    { value: 100000000, label: 'Advanced Opportunity', color: '#107c10' },
-    { value: 100000001, label: 'Neutral', color: '#616161' },
-    { value: 100000002, label: 'Stalled', color: '#c50f1f' },
-    { value: 100000003, label: 'Won Technical Decision', color: '#0f6cbd' },
+    { value: 100000000, label: 'On Track', color: '#107c10' },
+    { value: 100000001, label: 'Monitoring', color: '#616161' },
+    { value: 100000002, label: 'At Risk', color: '#c50f1f' },
+    { value: 100000003, label: 'Delivered', color: '#0f6cbd' },
   ],
 };
 
-export const assetTypeSet: OptionSet = {
-  logicalName: 'dat_assettype',
-  displayName: 'Asset Type',
+export const resourceTypeSet: OptionSet = {
+  logicalName: 'pt_resourcetype',
+  displayName: 'Resource Type',
   options: [
-    { value: 100000000, label: 'GitHub Repo', color: '#24292f' },
-    { value: 100000001, label: 'Deployed Sandbox', color: '#0f6cbd' },
-    { value: 100000002, label: 'Script / Runbook', color: '#8764b8' },
-    { value: 100000003, label: 'Recorded Video', color: '#c50f1f' },
-    { value: 100000004, label: 'Interactive Sandbox', color: '#107c10' },
-    { value: 100000005, label: 'Slide-embedded', color: '#ca5010' },
+    { value: 100000000, label: 'Document / Template', color: '#24292f' },
+    { value: 100000001, label: 'Dataset', color: '#0f6cbd' },
+    { value: 100000002, label: 'Tool / System', color: '#8764b8' },
+    { value: 100000003, label: 'Playbook / SOP', color: '#c50f1f' },
+    { value: 100000004, label: 'Environment / Sandbox', color: '#107c10' },
+    { value: 100000005, label: 'Reference Material', color: '#ca5010' },
   ],
 };
 
 export const maturitySet: OptionSet = {
-  logicalName: 'dat_maturity',
+  logicalName: 'pt_maturity',
   displayName: 'Maturity',
   options: [
     { value: 100000000, label: 'Draft', color: '#616161' },
-    { value: 100000001, label: 'Field-ready', color: '#0f6cbd' },
-    { value: 100000002, label: 'Certified (Gold)', color: '#c19c00' },
-    { value: 100000003, label: 'Deprecated', color: '#c50f1f' },
+    { value: 100000001, label: 'Ready', color: '#0f6cbd' },
+    { value: 100000002, label: 'Approved (Gold)', color: '#c19c00' },
+    { value: 100000003, label: 'Retired', color: '#c50f1f' },
   ],
 };
 
-export const assetGapReasonSet: OptionSet = {
-  logicalName: 'dat_assetgapreason',
-  displayName: 'Asset Gap Reason',
+export const riskReasonSet: OptionSet = {
+  logicalName: 'pt_riskreason',
+  displayName: 'Risk Reason',
   options: [
-    { value: 100000000, label: 'Not Yet Built', color: '#ca5010' },
-    { value: 100000001, label: 'Not Assetizable / Confidential', color: '#616161' },
-    { value: 100000002, label: 'One-off', color: '#8764b8' },
-    { value: 100000003, label: 'Used Partner Asset', color: '#0f6cbd' },
+    { value: 100000000, label: 'Not Yet Resourced', color: '#ca5010' },
+    { value: 100000001, label: 'Confidential / Restricted', color: '#616161' },
+    { value: 100000002, label: 'One-off Effort', color: '#8764b8' },
+    { value: 100000003, label: 'Using External Vendor', color: '#0f6cbd' },
   ],
 };
 
 const lookups: Record<string, Map<number, OptionSetOption>> = {
-  [solutionAreaSet.logicalName]: makeLookup(solutionAreaSet),
-  [deliveryFormatSet.logicalName]: makeLookup(deliveryFormatSet),
-  [salesStageSet.logicalName]: makeLookup(salesStageSet),
+  [practiceAreaSet.logicalName]: makeLookup(practiceAreaSet),
+  [projectTypeSet.logicalName]: makeLookup(projectTypeSet),
+  [statusSet.logicalName]: makeLookup(statusSet),
   [outcomeSet.logicalName]: makeLookup(outcomeSet),
-  [assetTypeSet.logicalName]: makeLookup(assetTypeSet),
+  [resourceTypeSet.logicalName]: makeLookup(resourceTypeSet),
   [maturitySet.logicalName]: makeLookup(maturitySet),
-  [assetGapReasonSet.logicalName]: makeLookup(assetGapReasonSet),
+  [riskReasonSet.logicalName]: makeLookup(riskReasonSet),
 };
 
 export function optionOf(set: OptionSet, value: number | undefined | null): OptionSetOption | undefined {

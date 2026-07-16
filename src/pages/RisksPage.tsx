@@ -1,13 +1,13 @@
 import { makeStyles, tokens, Spinner, MessageBar, MessageBarBody, Text, Caption1 } from '@fluentui/react-components';
 import { WarningRegular, TargetRegular } from '@fluentui/react-icons';
 import { useCoverageAnalytics } from '@/hooks/useCoverageAnalytics';
-import { customerName, sellerName } from '@/mockData/reference';
+import { clientName, leadName } from '@/mockData/reference';
 import { formatDate } from '@/lib/format';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SectionCard } from '@/components/ui/SectionCard';
 import { StatCard } from '@/components/ui/StatCard';
-import { SolutionAreaBadge } from '@/components/ui/SolutionAreaBadge';
-import { SellerAvatar } from '@/components/ui/SellerAvatar';
+import { PracticeAreaBadge } from '@/components/ui/PracticeAreaBadge';
+import { LeadAvatar } from '@/components/ui/LeadAvatar';
 
 const useStyles = makeStyles({
   page: { display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '40px' },
@@ -23,20 +23,20 @@ const useStyles = makeStyles({
     padding: '10px 0',
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
   },
-  presenter: { display: 'flex', alignItems: 'center', gap: '8px' },
+  lead: { display: 'flex', alignItems: 'center', gap: '8px' },
   muted: { color: tokens.colorNeutralForeground3 },
   center: { display: 'grid', placeItems: 'center', padding: '48px' },
   empty: { padding: '48px 32px', textAlign: 'center', color: tokens.colorNeutralForeground3 },
 });
 
-export function GapsPage() {
+export function RisksPage() {
   const styles = useStyles();
   const { isLoading, isError, gaps, summary } = useCoverageAnalytics();
 
   if (isLoading) {
     return (
       <div className={styles.center}>
-        <Spinner label="Loading coverage gaps…" />
+        <Spinner label="Loading at-risk projects…" />
       </div>
     );
   }
@@ -45,7 +45,7 @@ export function GapsPage() {
     return (
       <div className={styles.body} style={{ paddingTop: 24 }}>
         <MessageBar intent="error">
-          <MessageBarBody>Unable to load coverage gaps. Please try again.</MessageBarBody>
+          <MessageBarBody>Unable to load at-risk projects. Please try again.</MessageBarBody>
         </MessageBar>
       </div>
     );
@@ -56,24 +56,24 @@ export function GapsPage() {
   return (
     <div className={styles.page}>
       <PageHeader
-        title="Coverage Gaps"
-        subtitle="Story-only deliveries grouped by why no reusable asset backs them"
+        title="At-Risk Projects"
+        subtitle="Projects with no reusable resource, grouped by why they are at risk"
       />
 
       <div className={styles.body}>
         <div className={styles.stats}>
-          <StatCard label="Story-only Deliveries" value={summary.storyOnly} hint="no linked asset" icon={<WarningRegular />} accentColor="#ca5010" />
+          <StatCard label="At-Risk Projects" value={summary.storyOnly} hint="no linked resource" icon={<WarningRegular />} accentColor="#ca5010" />
           <StatCard
-            label="Biggest Gap Reason"
+            label="Biggest Risk Reason"
             value={biggest ? biggest.label : '—'}
-            hint={biggest ? `${biggest.deliveries.length} deliveries` : 'No gaps'}
+            hint={biggest ? `${biggest.projects.length} projects` : 'No risks'}
             icon={<TargetRegular />}
             accentColor={biggest?.color ?? '#616161'}
           />
         </div>
 
         {gaps.length === 0 ? (
-          <div className={styles.empty}>No coverage gaps — every delivery is asset-backed. 🎉</div>
+          <div className={styles.empty}>No at-risk projects — every project is resourced. 🎉</div>
         ) : (
           gaps.map((bucket) => (
             <SectionCard
@@ -81,20 +81,20 @@ export function GapsPage() {
               title={
                 <span className={styles.title}>
                   <span className={styles.dot} style={{ backgroundColor: bucket.color }} />
-                  {bucket.label} ({bucket.deliveries.length})
+                  {bucket.label} ({bucket.projects.length})
                 </span>
               }
             >
-              {bucket.deliveries.map((d) => (
-                <div key={d.id} className={styles.row}>
-                  <Caption1 className={styles.muted}>{formatDate(d.deliveryDate)}</Caption1>
-                  <Text weight="semibold">{d.name}</Text>
-                  <SolutionAreaBadge value={d.solutionArea} />
-                  <span className={styles.presenter}>
-                    <SellerAvatar sellerId={d.presenter} size={24} />
-                    {sellerName(d.presenter)}
+              {bucket.projects.map((p) => (
+                <div key={p.id} className={styles.row}>
+                  <Caption1 className={styles.muted}>{formatDate(p.startDate)}</Caption1>
+                  <Text weight="semibold">{p.name}</Text>
+                  <PracticeAreaBadge value={p.practiceArea} />
+                  <span className={styles.lead}>
+                    <LeadAvatar leadId={p.projectLead} size={24} />
+                    {leadName(p.projectLead)}
                   </span>
-                  <Caption1 className={styles.muted}>{customerName(d.customer)}</Caption1>
+                  <Caption1 className={styles.muted}>{clientName(p.client)}</Caption1>
                 </div>
               ))}
             </SectionCard>

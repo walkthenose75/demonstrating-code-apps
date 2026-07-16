@@ -1,10 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from '@/components/shell/AppShell';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { DeliveriesPage } from '@/pages/DeliveriesPage';
-import { AssetsPage } from '@/pages/AssetsPage';
-import { AssetDetailPage } from '@/pages/AssetDetailPage';
-import { GapsPage } from '@/pages/GapsPage';
+import { ProjectsPage } from '@/pages/ProjectsPage';
+import { ResourcesPage } from '@/pages/ResourcesPage';
+import { ResourceDetailPage } from '@/pages/ResourceDetailPage';
+import { RisksPage } from '@/pages/RisksPage';
 import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { BuildCostPage } from '@/pages/BuildCostPage';
 
@@ -13,10 +13,10 @@ export function App() {
     <AppShell>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
-        <Route path="/deliveries" element={<DeliveriesPage />} />
-        <Route path="/assets" element={<AssetsPage />} />
-        <Route path="/assets/:id" element={<AssetDetailPage />} />
-        <Route path="/gaps" element={<GapsPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/resources/:id" element={<ResourceDetailPage />} />
+        <Route path="/risks" element={<RisksPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/build-cost" element={<BuildCostPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

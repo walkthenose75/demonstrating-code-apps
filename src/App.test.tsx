@@ -12,9 +12,9 @@ describe('App — smoke tests', () => {
     render(<App />);
     expect(screen.getByText('Project Tracker')).toBeTruthy();
     expect(screen.getByText('Command Center')).toBeTruthy();
-    expect(screen.getByText('Deliveries')).toBeTruthy();
-    expect(screen.getByText('Asset Catalog')).toBeTruthy();
-    expect(screen.getByText('Coverage Gaps')).toBeTruthy();
+    expect(screen.getByText('Projects')).toBeTruthy();
+    expect(screen.getByText('Resource Library')).toBeTruthy();
+    expect(screen.getByText('At-Risk Projects')).toBeTruthy();
     expect(screen.getByText('Leaderboard')).toBeTruthy();
   });
 

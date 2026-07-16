@@ -18,34 +18,34 @@
       "order": 1,
       "kind": "dataverse-table-custom",
       "apiId": "dataverse",
-      "tableLogicalName": "dat_demodelivery",
-      "entitySetName": "dat_demodeliveries",
-      "displayName": "Demo Delivery",
+      "tableLogicalName": "pt_project",
+      "entitySetName": "pt_projects",
+      "displayName": "Project",
       "requiresLiveConnectionId": false,
       "skill": "/add-dataverse",
-      "command": "pac code add-data-source -a dataverse -t dat_demodelivery"
+      "command": "pac code add-data-source -a dataverse -t pt_project"
     },
     {
       "order": 2,
       "kind": "dataverse-table-custom",
       "apiId": "dataverse",
-      "tableLogicalName": "dat_demoasset",
-      "entitySetName": "dat_demoassets",
-      "displayName": "Demo Asset",
+      "tableLogicalName": "pt_resource",
+      "entitySetName": "pt_resources",
+      "displayName": "Resource",
       "requiresLiveConnectionId": false,
       "skill": "/add-dataverse",
-      "command": "pac code add-data-source -a dataverse -t dat_demoasset"
+      "command": "pac code add-data-source -a dataverse -t pt_resource"
     },
     {
       "order": 3,
       "kind": "dataverse-table-custom",
       "apiId": "dataverse",
-      "tableLogicalName": "dat_demoassetusage",
-      "entitySetName": "dat_demoassetusages",
-      "displayName": "Demo Asset Usage",
+      "tableLogicalName": "pt_assignment",
+      "entitySetName": "pt_assignments",
+      "displayName": "Assignment",
       "requiresLiveConnectionId": false,
       "skill": "/add-dataverse",
-      "command": "pac code add-data-source -a dataverse -t dat_demoassetusage"
+      "command": "pac code add-data-source -a dataverse -t pt_assignment"
     },
     {
       "order": 4,
@@ -53,11 +53,11 @@
       "apiId": "dataverse",
       "tableLogicalName": "account",
       "entitySetName": "accounts",
-      "displayName": "Account (Customer)",
+      "displayName": "Account (Client)",
       "requiresLiveConnectionId": false,
       "skill": "/add-dataverse",
       "command": "pac code add-data-source -a dataverse -t account",
-      "note": "Reused OOB table targeted by dat_customer. Register so the app can read customer names."
+      "note": "Reused OOB table targeted by pt_client. Register so the app can read client names."
     },
     {
       "order": 5,
@@ -65,11 +65,11 @@
       "apiId": "dataverse",
       "tableLogicalName": "systemuser",
       "entitySetName": "systemusers",
-      "displayName": "User (Presenter / Maintainer)",
+      "displayName": "User (Project Lead / Owner)",
       "requiresLiveConnectionId": false,
       "skill": "/add-dataverse",
       "command": "pac code add-data-source -a dataverse -t systemuser",
-      "note": "Reused OOB table targeted by dat_presenter and dat_maintainer."
+      "note": "Reused OOB table targeted by pt_projectlead and pt_owner."
     },
     {
       "order": 6,
@@ -80,7 +80,7 @@
       "requiresLiveConnectionId": true,
       "skill": "/add-office365",
       "command": "pac code add-data-source -a shared_office365users -c <CONN_OFFICE365USERS>",
-      "note": "Provides seller/presenter profile and people-search data. Discover the connection ID with `pac connection list` (filter shared_office365users) or /list-connections before running."
+      "note": "Provides project-lead/owner profile and people-search data. Discover the connection ID with `pac connection list` (filter shared_office365users) or /list-connections before running."
     }
   ]
 }

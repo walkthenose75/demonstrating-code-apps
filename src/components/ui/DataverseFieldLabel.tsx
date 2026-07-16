@@ -11,9 +11,9 @@ const useStyles = makeStyles({
 });
 
 type Props = LabelProps & {
-  /** Dataverse table logical name (e.g. `dat_demodelivery`). Omit for client-only fields. */
+  /** Dataverse table logical name (e.g. `pt_project`). Omit for client-only fields. */
   tableLogicalName?: string;
-  /** Dataverse column logical name (e.g. `dat_deliverydate`). Omit for client-only fields. */
+  /** Dataverse column logical name (e.g. `pt_startdate`). Omit for client-only fields. */
   fieldLogicalName?: string;
   /** Display text to use when metadata is not available. */
   fallback?: string;

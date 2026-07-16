@@ -1,4 +1,4 @@
-# Provisioning Runbook — Project Tracker (Demo Asset Coverage)
+# Provisioning Runbook — Project Tracker
 
 This runbook executes the three provisioning plan artifacts in `dataverse/` to stand up the
 **Project Tracker** Dataverse schema and bind it to the Code App. The plans are the re-runnable
@@ -10,7 +10,7 @@ source of truth; this file is the ordered driver.
 | `provision-relationships.plan.json` | 5 lookup relationships (+ their lookup columns) |
 | `register-datasources.plan.json` | `pac code add-data-source` bindings + typed SDK |
 
-Publisher prefix: **`dat`** · Solution: **`<solution-name>`** · App: **Project Tracker**
+Publisher prefix: **`pt`** · Solution: **`<solution-name>`** · App: **Project Tracker**
 
 ---
 
@@ -28,7 +28,7 @@ Publisher prefix: **`dat`** · Solution: **`<solution-name>`** · App: **Project
    pac auth who                                       # confirm the ACTIVE environment
    ```
    The plugin resolves the target environment from the active PAC profile — verify it is the one you intend.
-3. **The publisher prefix `dat` is confirmed.** `dat` is **immutable once data exists**
+3. **The publisher prefix `pt` is confirmed.** `pt` is **immutable once data exists**
    (see `docs/adr/0001-publisher-prefix.md`). Confirm it matches `dataverse/planning-payload.json`
    before creating a single artifact. A wrong prefix cannot be changed after rows are written.
 4. **The solution `<solution-name>` exists and is active.** Every `dv-metadata` call must carry the
@@ -67,13 +67,12 @@ rollups).
 
 ### 🚦 Blockers before the live run
 
-1. **Publisher-prefix conflict — ✅ RESOLVED (keep `dat`).** The setup wizard had written
-   `contoso` to `.env`, but the planning payload + ADR-0001 use **`dat`**, which is hard-coded
-   across `src/lib/optionSets.ts`, the generated types, and `planning-payload.json`. Keeping `dat`
-   is the zero-churn choice, so `.env` (`PP_PUBLISHER_PREFIX`) and `README.md` were updated to
-   `dat`. **Action still required at run time:** ensure a publisher with prefix `dat` exists in the
-   target environment (create it via the Maker portal or `dv-solution`), then run the provisioner
-   with the default prefix.
+1. **Publisher-prefix conflict — ✅ RESOLVED (keep `pt`).** The planning payload + ADR-0001 use
+   **`pt`**, which is hard-coded across `src/lib/dataverse-field-name.ts`, the generated types, and
+   `planning-payload.json`. Keeping `pt` is the zero-churn choice, so `.env`
+   (`PP_PUBLISHER_PREFIX`) and `README.md` use `pt`. **Action still required at run time:** ensure a
+   publisher with prefix `pt` exists in the target environment (create it via the Maker portal or
+   `dv-solution`), then run the provisioner with the default prefix.
 2. **Interactive sign-in — ⛔ still required.** The target org `org8599b1c0.crm.dynamics.com` is in
    tenant `M365x61645866`; the local `az` context is a different tenant, so non-interactive auth is
    unavailable. `--auth devicecode` needs a human to enter a code once. Run it when the owner is
@@ -88,14 +87,14 @@ rollups).
 Run in this exact order — the golden sequence fails if reversed.
 
 ### 1. Confirm the solution — `dv-solution`
-Confirm (or create) `<solution-name>` under publisher prefix `dat`, and pin it for the session so
+Confirm (or create) `<solution-name>` under publisher prefix `pt`, and pin it for the session so
 every subsequent `dv-metadata` call inherits the solution context.
 
 ### 2. Create option sets + tables + columns — `dv-metadata` (from `provision-tables.plan.json`)
 Walk the plan in order:
 1. Create the **7 global option sets** (`optionSets[]`) — global, never inline; values start at `100000000`.
 2. Create the **3 tables** (`tables[]`, in `order` 1→3) with their primary name column and ownership
-   (`dat_demodelivery` = UserOwned, `dat_demoasset` = OrganizationOwned, `dat_demoassetusage` = UserOwned).
+   (`pt_project` = UserOwned, `pt_resource` = OrganizationOwned, `pt_assignment` = UserOwned).
 3. Create each table's **simple columns** (String/Memo/Integer/DateTime).
 4. Create each table's **picklist columns**, binding to the global option set via
    `GlobalOptionSet@odata.bind` (`globalOptionSetName`).
@@ -140,9 +139,9 @@ Each command updates `power.config.json` and regenerates typed files under `src/
 
 - `pac auth who` shows the intended environment before you start.
 - After step 2: the 3 tables and 7 choices appear in `<solution-name>`'s component list.
-- After step 3: each lookup column (`dat_customer`, `dat_presenter`, `dat_maintainer`,
-  `dat_demodelivery`, `dat_demoasset`) is present on the referencing table.
-- After step 4: the tables/columns resolve over OData (`GET {env}/api/data/v9.2/dat_demodeliveries?$top=1`).
+- After step 3: each lookup column (`pt_client`, `pt_projectlead`, `pt_owner`,
+  `pt_project`, `pt_resource`) is present on the referencing table.
+- After step 4: the tables/columns resolve over OData (`GET {env}/api/data/v9.2/pt_projects?$top=1`).
 - After step 5: `power.config.json` lists the 5 Dataverse databaseReferences + the Office 365 Users
   connectionReference, and `src/generated/**` contains a service + model per entity.
 - With `VITE_USE_MOCK=false`, the running app reads/writes real rows.
@@ -166,4 +165,4 @@ Each command updates `power.config.json` and regenerates typed files under `src/
 - `dataverse/register-datasources.plan.json` — reviewed & executed (input)
 - `power.config.json` — updated by step 5 (database/connection references)
 - `src/generated/**` — regenerated by step 5
-- `.env` — set `VITE_USE_MOCK=false` (and confirm `PP_PUBLISHER_PREFIX=dat`)
+- `.env` — set `VITE_USE_MOCK=false` (and confirm `PP_PUBLISHER_PREFIX=pt`)

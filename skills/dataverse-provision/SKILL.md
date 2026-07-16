@@ -88,9 +88,9 @@ to `GlobalOptionSetDefinitions` / a rollup `RollupType` definition.
 
 ```bash
 # Register each table as a Code App data source (regenerates src/generated/)
-pac code add-data-source -a dataverse -t dat_demodelivery
-pac code add-data-source -a dataverse -t dat_demoasset
-pac code add-data-source -a dataverse -t dat_demoassetusage
+pac code add-data-source -a dataverse -t pt_project
+pac code add-data-source -a dataverse -t pt_resource
+pac code add-data-source -a dataverse -t pt_assignment
 ```
 
 Then swap the app's data provider from mock to Dataverse, `npm run build`, and

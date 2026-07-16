@@ -2,15 +2,15 @@ import { makeStyles, tokens, Spinner, MessageBar, MessageBarBody, Link, Text, Ca
 import { ArrowLeft16Regular, Open16Regular, ArrowRepeatAll16Regular, CalendarLtr16Regular } from '@fluentui/react-icons';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import { useCoverageAnalytics } from '@/hooks/useCoverageAnalytics';
-import { deliveriesForAsset } from '@/lib/analytics';
-import { assetTypeSet, maturitySet } from '@/lib/optionSets';
-import { sellerName } from '@/mockData/reference';
+import { projectsForResource } from '@/lib/analytics';
+import { resourceTypeSet, maturitySet } from '@/lib/optionSets';
+import { leadName } from '@/mockData/reference';
 import { formatDate } from '@/lib/format';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SectionCard } from '@/components/ui/SectionCard';
 import { OptionBadge } from '@/components/ui/OptionBadge';
-import { SolutionAreaBadge } from '@/components/ui/SolutionAreaBadge';
-import { SellerAvatar } from '@/components/ui/SellerAvatar';
+import { PracticeAreaBadge } from '@/components/ui/PracticeAreaBadge';
+import { LeadAvatar } from '@/components/ui/LeadAvatar';
 
 const useStyles = makeStyles({
   page: { display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '40px' },
@@ -31,20 +31,20 @@ const useStyles = makeStyles({
     padding: '10px 0',
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
   },
-  presenter: { display: 'flex', alignItems: 'center', gap: '8px' },
+  lead: { display: 'flex', alignItems: 'center', gap: '8px' },
   center: { display: 'grid', placeItems: 'center', padding: '48px' },
   empty: { padding: '24px', textAlign: 'center', color: tokens.colorNeutralForeground3 },
 });
 
-export function AssetDetailPage() {
+export function ResourceDetailPage() {
   const styles = useStyles();
   const { id } = useParams<{ id: string }>();
-  const { isLoading, isError, topAssets, deliveries, usages } = useCoverageAnalytics();
+  const { isLoading, isError, topResources, projects, assignments } = useCoverageAnalytics();
 
   if (isLoading) {
     return (
       <div className={styles.center}>
-        <Spinner label="Loading asset…" />
+        <Spinner label="Loading resource…" />
       </div>
     );
   }
@@ -53,72 +53,72 @@ export function AssetDetailPage() {
     return (
       <div className={styles.body} style={{ paddingTop: 24 }}>
         <MessageBar intent="error">
-          <MessageBarBody>Unable to load this asset. Please try again.</MessageBarBody>
+          <MessageBarBody>Unable to load this resource. Please try again.</MessageBarBody>
         </MessageBar>
       </div>
     );
   }
 
-  const asset = topAssets.find((a) => a.id === id);
+  const resource = topResources.find((r) => r.id === id);
 
-  if (!asset) {
+  if (!resource) {
     return (
       <div className={styles.body} style={{ paddingTop: 24 }}>
         <MessageBar intent="warning">
           <MessageBarBody>
-            Asset not found. <RouterLink to="/assets">Back to the asset catalog</RouterLink>
+            Resource not found. <RouterLink to="/resources">Back to the resource library</RouterLink>
           </MessageBarBody>
         </MessageBar>
       </div>
     );
   }
 
-  const usedIn = deliveriesForAsset(asset.id, usages, deliveries);
+  const usedIn = projectsForResource(resource.id, assignments, projects);
 
   return (
     <div className={styles.page}>
-      <RouterLink to="/assets" className={styles.back}>
-        <ArrowLeft16Regular /> Asset Catalog
+      <RouterLink to="/resources" className={styles.back}>
+        <ArrowLeft16Regular /> Resource Library
       </RouterLink>
 
       <PageHeader
-        title={asset.name}
-        subtitle={asset.description}
-        actions={asset.isStale ? <Badge color="warning" appearance="tint" size="large">Stale</Badge> : undefined}
+        title={resource.name}
+        subtitle={resource.description}
+        actions={resource.isStale ? <Badge color="warning" appearance="tint" size="large">Stale</Badge> : undefined}
       />
 
       <div className={styles.body}>
         <SectionCard title="Overview">
           <div className={styles.meta}>
             <div className={styles.badges}>
-              <OptionBadge set={assetTypeSet} value={asset.assetType} />
-              <SolutionAreaBadge value={asset.solutionArea} />
-              <OptionBadge set={maturitySet} value={asset.maturity} />
+              <OptionBadge set={resourceTypeSet} value={resource.resourceType} />
+              <PracticeAreaBadge value={resource.practiceArea} />
+              <OptionBadge set={maturitySet} value={resource.maturity} />
             </div>
             <div className={styles.grid}>
               <div className={styles.cell}>
-                <Caption1 className={styles.label}>Maintainer</Caption1>
+                <Caption1 className={styles.label}>Owner</Caption1>
                 <span className={styles.value}>
-                  <SellerAvatar sellerId={asset.maintainer} size={24} />
-                  {sellerName(asset.maintainer)}
+                  <LeadAvatar leadId={resource.owner} size={24} />
+                  {leadName(resource.owner)}
                 </span>
               </div>
               <div className={styles.cell}>
-                <Caption1 className={styles.label}>Reuse</Caption1>
-                <span className={styles.value}><ArrowRepeatAll16Regular />{asset.reuse}</span>
+                <Caption1 className={styles.label}>Uses</Caption1>
+                <span className={styles.value}><ArrowRepeatAll16Regular />{resource.reuse}</span>
               </div>
               <div className={styles.cell}>
                 <Caption1 className={styles.label}>Last used</Caption1>
                 <span className={styles.value}>
                   <CalendarLtr16Regular />
-                  {asset.lastUsedOn ? formatDate(asset.lastUsedOn) : 'Never'}
+                  {resource.lastUsedOn ? formatDate(resource.lastUsedOn) : 'Never'}
                 </span>
               </div>
-              {asset.assetUrl ? (
+              {resource.resourceUrl ? (
                 <div className={styles.cell}>
                   <Caption1 className={styles.label}>Location</Caption1>
-                  <Link href={asset.assetUrl} target="_blank" rel="noreferrer">
-                    Open asset <Open16Regular />
+                  <Link href={resource.resourceUrl} target="_blank" rel="noreferrer">
+                    Open resource <Open16Regular />
                   </Link>
                 </div>
               ) : null}
@@ -126,18 +126,18 @@ export function AssetDetailPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Used in these deliveries" subtitle={`${usedIn.length} ${usedIn.length === 1 ? 'delivery' : 'deliveries'}`}>
+        <SectionCard title="Used in these projects" subtitle={`${usedIn.length} ${usedIn.length === 1 ? 'project' : 'projects'}`}>
           {usedIn.length === 0 ? (
-            <div className={styles.empty}>This asset has not been linked to any delivery yet.</div>
+            <div className={styles.empty}>This resource has not been linked to any project yet.</div>
           ) : (
-            usedIn.map((d) => (
-              <div key={d.id} className={styles.row}>
-                <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>{formatDate(d.deliveryDate)}</Caption1>
-                <Text weight="semibold">{d.name}</Text>
-                <SolutionAreaBadge value={d.solutionArea} />
-                <span className={styles.presenter}>
-                  <SellerAvatar sellerId={d.presenter} size={24} />
-                  {sellerName(d.presenter)}
+            usedIn.map((p) => (
+              <div key={p.id} className={styles.row}>
+                <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>{formatDate(p.startDate)}</Caption1>
+                <Text weight="semibold">{p.name}</Text>
+                <PracticeAreaBadge value={p.practiceArea} />
+                <span className={styles.lead}>
+                  <LeadAvatar leadId={p.projectLead} size={24} />
+                  {leadName(p.projectLead)}
                 </span>
               </div>
             ))

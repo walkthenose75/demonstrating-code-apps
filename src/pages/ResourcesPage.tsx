@@ -1,7 +1,7 @@
 import { makeStyles, tokens, Spinner, MessageBar, MessageBarBody } from '@fluentui/react-components';
 import { useCoverageAnalytics } from '@/hooks/useCoverageAnalytics';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { AssetCard } from '@/components/AssetCard';
+import { ResourceCard } from '@/components/ResourceCard';
 
 const useStyles = makeStyles({
   page: { display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '40px' },
@@ -16,14 +16,14 @@ const useStyles = makeStyles({
   empty: { padding: '48px 32px', color: tokens.colorNeutralForeground3 },
 });
 
-export function AssetsPage() {
+export function ResourcesPage() {
   const styles = useStyles();
-  const { isLoading, isError, topAssets } = useCoverageAnalytics();
+  const { isLoading, isError, topResources } = useCoverageAnalytics();
 
   if (isLoading) {
     return (
       <div className={styles.center}>
-        <Spinner label="Loading asset catalog…" />
+        <Spinner label="Loading resource library…" />
       </div>
     );
   }
@@ -32,7 +32,7 @@ export function AssetsPage() {
     return (
       <div className={styles.message} style={{ paddingTop: 24 }}>
         <MessageBar intent="error">
-          <MessageBarBody>Unable to load the asset catalog. Please try again.</MessageBarBody>
+          <MessageBarBody>Unable to load the resource library. Please try again.</MessageBarBody>
         </MessageBar>
       </div>
     );
@@ -41,15 +41,15 @@ export function AssetsPage() {
   return (
     <div className={styles.page}>
       <PageHeader
-        title="Asset Catalog"
-        subtitle="Reusable demo assets, ranked by how many deliveries they have backed"
+        title="Resource Library"
+        subtitle="Reusable resources, ranked by how many projects they have backed"
       />
-      {topAssets.length === 0 ? (
-        <div className={styles.empty}>No assets in the catalog yet.</div>
+      {topResources.length === 0 ? (
+        <div className={styles.empty}>No resources in the library yet.</div>
       ) : (
         <div className={styles.grid}>
-          {topAssets.map((asset) => (
-            <AssetCard key={asset.id} asset={asset} />
+          {topResources.map((resource) => (
+            <ResourceCard key={resource.id} resource={resource} />
           ))}
         </div>
       )}

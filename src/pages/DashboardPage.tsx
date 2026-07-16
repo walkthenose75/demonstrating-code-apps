@@ -10,6 +10,7 @@ import {
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useCoverageAnalytics } from '@/hooks/useCoverageAnalytics';
+import { leadName } from '@/mockData/reference';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SectionCard } from '@/components/ui/SectionCard';
 import { StatCard } from '@/components/ui/StatCard';
@@ -64,12 +65,12 @@ const useStyles = makeStyles({
 export function DashboardPage() {
   const styles = useStyles();
   const navigate = useNavigate();
-  const { isLoading, isError, summary, byArea, trend, topAssets, assets, heatmap, heatMax } = useCoverageAnalytics();
+  const { isLoading, isError, summary, byArea, trend, topResources, resources, heatmap, heatMax } = useCoverageAnalytics();
 
   if (isLoading) {
     return (
       <div className={styles.center}>
-        <Spinner label="Loading coverage analytics…" />
+        <Spinner label="Loading portfolio analytics…" />
       </div>
     );
   }
@@ -78,65 +79,65 @@ export function DashboardPage() {
     return (
       <div className={styles.body} style={{ paddingTop: 24 }}>
         <MessageBar intent="error">
-          <MessageBarBody>Unable to load coverage analytics. Please try again.</MessageBarBody>
+          <MessageBarBody>Unable to load portfolio analytics. Please try again.</MessageBarBody>
         </MessageBar>
       </div>
     );
   }
 
-  const totalReuse = assets.reduce((sum, a) => sum + (a.reuseCount ?? 0), 0);
-  const avgReuse = assets.length > 0 ? (totalReuse / assets.length).toFixed(1) : '0';
+  const totalReuse = resources.reduce((sum, r) => sum + (r.usageCount ?? 0), 0);
+  const avgReuse = resources.length > 0 ? (totalReuse / resources.length).toFixed(1) : '0';
 
   return (
     <div className={styles.page}>
       <PageHeader
         hero
-        title="Coverage Command Center"
-        subtitle="How much of our field demo motion is backed by reusable assets"
+        title="Portfolio Command Center"
+        subtitle="How much of our project portfolio is backed by reusable resources"
         actions={
-          <Button appearance="primary" icon={<ArrowRight16Regular />} iconPosition="after" onClick={() => navigate('/deliveries')}>
-            Browse deliveries
+          <Button appearance="primary" icon={<ArrowRight16Regular />} iconPosition="after" onClick={() => navigate('/projects')}>
+            Browse projects
           </Button>
         }
       />
 
       <div className={styles.body}>
         <div className={styles.stats}>
-          <StatCard label="Total Deliveries" value={summary.total} icon={<Board24Regular />} accentColor="#0f6cbd" />
-          <StatCard label="Asset-Backed" value={summary.covered} hint="≥1 linked asset" icon={<CheckmarkCircle24Regular />} accentColor="#107c10" />
-          <StatCard label="Story Only" value={summary.storyOnly} hint="no linked asset" icon={<DocumentText24Regular />} accentColor="#ca5010" />
-          <StatCard label="Assets in Catalog" value={assets.length} icon={<Box24Regular />} accentColor="#5c2e91" />
-          <StatCard label="Avg Reuse / Asset" value={avgReuse} hint="deliveries per asset" icon={<ArrowRepeatAll24Regular />} accentColor="#8764b8" />
-          <StatCard label="Coverage %" value={`${summary.coveragePct}%`} icon={<DataPie24Regular />} accentColor="#c19c00" />
+          <StatCard label="Total Projects" value={summary.total} icon={<Board24Regular />} accentColor="#0f6cbd" />
+          <StatCard label="Resourced" value={summary.covered} hint="≥1 linked resource" icon={<CheckmarkCircle24Regular />} accentColor="#107c10" />
+          <StatCard label="At Risk" value={summary.storyOnly} hint="no linked resource" icon={<DocumentText24Regular />} accentColor="#ca5010" />
+          <StatCard label="Resources in Library" value={resources.length} icon={<Box24Regular />} accentColor="#5c2e91" />
+          <StatCard label="Avg Uses / Resource" value={avgReuse} hint="projects per resource" icon={<ArrowRepeatAll24Regular />} accentColor="#8764b8" />
+          <StatCard label="Resourced %" value={`${summary.coveragePct}%`} icon={<DataPie24Regular />} accentColor="#c19c00" />
         </div>
 
         <div className={styles.two}>
-          <SectionCard title="Coverage" subtitle="Asset-backed vs. story-only">
+          <SectionCard title="Coverage" subtitle="Resourced vs. at-risk">
             <div className={styles.dialRow}>
               <CoverageDial value={summary.coveragePct} />
               <div className={styles.dialCounts}>
                 <div className={styles.count}>
                   <span className={styles.countBig} style={{ color: '#107c10' }}>{summary.covered}</span>
-                  <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Covered</Caption1>
+                  <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Resourced</Caption1>
                 </div>
                 <div className={styles.count}>
                   <span className={styles.countBig} style={{ color: '#ca5010' }}>{summary.storyOnly}</span>
-                  <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Story only</Caption1>
+                  <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>At risk</Caption1>
                 </div>
               </div>
             </div>
           </SectionCard>
 
-          <SectionCard title="Trend" subtitle="Monthly delivery volume and coverage">
+          <SectionCard title="Trend" subtitle="Monthly project volume and coverage">
             <TrendChart data={trend} />
           </SectionCard>
         </div>
 
-        <SectionCard title="Activity" subtitle="Delivery cadence over the last 26 weeks">
+        <SectionCard title="Activity" subtitle="Project cadence over the last 26 weeks">
           <ActivityHeatmap grid={heatmap} max={heatMax} />
         </SectionCard>
 
-        <SectionCard title="Coverage by solution area" subtitle="Where our asset backing is strong or thin">
+        <SectionCard title="Coverage by practice area" subtitle="Where our resource backing is strong or thin">
           {byArea.map((row) => (
             <div key={row.area} className={styles.areaRow}>
               <div className={styles.areaLabel}>
@@ -150,19 +151,19 @@ export function DashboardPage() {
           ))}
         </SectionCard>
 
-        <SectionCard title="Top reused assets" subtitle="Assets backing the most deliveries" flush>
+        <SectionCard title="Top reused resources" subtitle="Resources backing the most projects" flush>
           <div style={{ padding: '0 20px' }}>
-            {topAssets.slice(0, 6).map((asset) => (
-              <div key={asset.id} className={styles.assetRow}>
+            {topResources.slice(0, 6).map((resource) => (
+              <div key={resource.id} className={styles.assetRow}>
                 <div className={styles.assetName}>
-                  <Text weight="semibold">{asset.name}</Text>
-                  {asset.maintainer ? (
-                    <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Maintained by {asset.maintainer}</Caption1>
+                  <Text weight="semibold">{resource.name}</Text>
+                  {resource.owner ? (
+                    <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>Owned by {leadName(resource.owner)}</Caption1>
                   ) : null}
                 </div>
                 <span className={styles.reuse}>
                   <ArrowRepeatAll24Regular style={{ width: 18, height: 18 }} />
-                  {asset.reuse}
+                  {resource.reuse}
                 </span>
               </div>
             ))}

@@ -5,7 +5,7 @@ import { formatDate } from '@/lib/format';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SectionCard } from '@/components/ui/SectionCard';
 import { CoverageBar } from '@/components/ui/CoverageBar';
-import { SellerAvatar } from '@/components/ui/SellerAvatar';
+import { LeadAvatar } from '@/components/ui/LeadAvatar';
 
 const useStyles = makeStyles({
   page: { display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '40px' },
@@ -38,7 +38,7 @@ function medal(rank: number): string {
 
 export function LeaderboardPage() {
   const styles = useStyles();
-  const { isLoading, isError, sellers, topAssets } = useCoverageAnalytics();
+  const { isLoading, isError, leads, topResources } = useCoverageAnalytics();
 
   if (isLoading) {
     return (
@@ -60,31 +60,31 @@ export function LeaderboardPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Leaderboard" subtitle="Top presenters by delivery volume and top assets by reuse" />
+      <PageHeader title="Leaderboard" subtitle="Top project leads by volume and top resources by reuse" />
 
       <div className={styles.body}>
-        <SectionCard title="Sellers" subtitle="Ranked by deliveries logged" flush>
+        <SectionCard title="Project Leads" subtitle="Ranked by projects led" flush>
           <table className={styles.table}>
             <thead>
               <tr>
                 <th className={styles.th}>#</th>
-                <th className={styles.th}>Presenter</th>
-                <th className={`${styles.th} ${styles.num}`}>Deliveries</th>
-                <th className={`${styles.th} ${styles.num}`}>Covered</th>
+                <th className={styles.th}>Lead</th>
+                <th className={`${styles.th} ${styles.num}`}>Projects</th>
+                <th className={`${styles.th} ${styles.num}`}>Resourced</th>
                 <th className={styles.th}>Coverage</th>
               </tr>
             </thead>
             <tbody>
-              {sellers.map((s, i) => (
-                <tr key={s.sellerId}>
+              {leads.map((s, i) => (
+                <tr key={s.leadId}>
                   <td className={`${styles.td} ${styles.rank}`}>{medal(i + 1)}</td>
                   <td className={styles.td}>
                     <span className={styles.who}>
-                      <SellerAvatar sellerId={s.sellerId} size={28} />
+                      <LeadAvatar leadId={s.leadId} size={28} />
                       {s.name}
                     </span>
                   </td>
-                  <td className={`${styles.td} ${styles.num}`}>{s.deliveries}</td>
+                  <td className={`${styles.td} ${styles.num}`}>{s.projects}</td>
                   <td className={`${styles.td} ${styles.num}`}>{s.covered}</td>
                   <td className={styles.td}>
                     <span className={styles.covCell}>
@@ -98,34 +98,34 @@ export function LeaderboardPage() {
           </table>
         </SectionCard>
 
-        <SectionCard title="Most reused assets" subtitle="Ranked by number of deliveries backed" flush>
+        <SectionCard title="Most reused resources" subtitle="Ranked by number of projects backed" flush>
           <table className={styles.table}>
             <thead>
               <tr>
                 <th className={styles.th}>#</th>
-                <th className={styles.th}>Asset</th>
-                <th className={`${styles.th} ${styles.num}`}>Reuse</th>
+                <th className={styles.th}>Resource</th>
+                <th className={`${styles.th} ${styles.num}`}>Uses</th>
                 <th className={styles.th}>Last used</th>
                 <th className={styles.th}>Status</th>
               </tr>
             </thead>
             <tbody>
-              {topAssets.map((a, i) => (
-                <tr key={a.id}>
+              {topResources.map((r, i) => (
+                <tr key={r.id}>
                   <td className={`${styles.td} ${styles.rank}`}>{medal(i + 1)}</td>
                   <td className={styles.td}>
-                    <Link to={`/assets/${a.id}`} className={styles.link}>{a.name}</Link>
+                    <Link to={`/resources/${r.id}`} className={styles.link}>{r.name}</Link>
                   </td>
                   <td className={`${styles.td} ${styles.num}`}>
-                    <Text weight="semibold">{a.reuse}</Text>
+                    <Text weight="semibold">{r.reuse}</Text>
                   </td>
                   <td className={styles.td}>
                     <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>
-                      {a.lastUsedOn ? formatDate(a.lastUsedOn) : 'Never'}
+                      {r.lastUsedOn ? formatDate(r.lastUsedOn) : 'Never'}
                     </Caption1>
                   </td>
                   <td className={styles.td}>
-                    {a.isStale ? <Badge color="warning" appearance="tint">Stale</Badge> : <Badge color="success" appearance="tint">Active</Badge>}
+                    {r.isStale ? <Badge color="warning" appearance="tint">Stale</Badge> : <Badge color="success" appearance="tint">Active</Badge>}
                   </td>
                 </tr>
               ))}
