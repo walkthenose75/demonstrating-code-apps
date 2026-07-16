@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "artifact": "provision-tables.plan.json",
+    "purpose": "Ordered, machine-readable plan to create global option sets, custom tables, and columns for the Project Tracker (Demo Asset Coverage) app.",
+    "generatedFrom": "dataverse/planning-payload.json",
+    "publisherPrefix": "dat",
+    "publisherDisplayName": "Demo Asset Tracker",
+    "solutionUniqueName": "<solution-name>",
+    "optionSetValueBase": 100000000,
+    "goldenSequenceStep": "Steps 1-4 (option sets, tables, simple columns, picklist columns). Lookup columns are provisioned by provision-relationships.plan.json (step 5).",
+    "notes": [
+      "Publisher prefix 'dat' is immutable once data exists; confirm before running (see docs/adr/0001-publisher-prefix.md).",
+      "All choice columns bind to GLOBAL option sets via GlobalOptionSet@odata.bind; never embed inline option sets.",
+      "Every dv-metadata call must carry the solution context (MSCRM.SolutionUniqueName) so artifacts land in <solution-name>, not the Default Solution.",
+      "Lookup columns listed under each table's 'lookupColumns' are created by provision-relationships.plan.json after all tables exist."
+    ]
+  },
+  "reuseOOB": [
+    {
+      "logicalName": "account",
+      "displayName": "Account",
+      "usedAs": "Customer",
+      "usedBy": ["dat_demodelivery.dat_customer"],
+      "reason": "OOB organization/customer table. Do NOT create a custom customer table; add via pac solution add-reference and target with a Lookup."
+    },
+    {
+      "logicalName": "systemuser",
+      "displayName": "User",
+      "usedAs": "Seller / Presenter / Maintainer",
+      "usedBy": ["dat_demodelivery.dat_presenter", "dat_demoasset.dat_maintainer"],
+      "reason": "OOB internal-user table, populated from Entra ID. Do NOT create a custom person/seller table; target with Lookups."
+    }
+  ],
+  "optionSets": [
+    {
+      "name": "dat_solutionarea",
+      "displayName": "Solution Area",
+      "isGlobal": true,
+      "valueBase": 100000000,
+      "options": [
+        { "label": "Azure Infrastructure", "value": 100000000 },
+        { "label": "Data & AI", "value": 100000001 },
+        { "label": "Security", "value": 100000002 },
+        { "label": "Modern Work", "value": 100000003 },
+        { "label": "Business Applications", "value": 100000004 },
+        { "label": "Copilot", "value": 100000005 },
+        { "label": "Other", "value": 100000006 }
+      ]
+    },
+    {
+      "name": "dat_deliveryformat",
+      "displayName": "Delivery Format",
+      "isGlobal": true,
+      "valueBase": 100000000,
+      "options": [
+        { "label": "In-person", "value": 100000000 },
+        { "label": "Remote", "value": 100000001 },
+        { "label": "Event / Booth", "value": 100000002 },
+        { "label": "Hybrid", "value": 100000003 }
+      ]
+    },
+    {
+      "name": "dat_deliverystage",
+      "displayName": "Sales Stage",
+      "isGlobal": true,
+      "valueBase": 100000000,
+      "options": [
+        { "label": "Discovery", "value": 100000000 },
+        { "label": "Technical Validation", "value": 100000001 },
+        { "label": "Proof of Concept", "value": 100000002 },
+        { "label": "Executive Briefing", "value": 100000003 }
+      ]
+    },
+    {
+      "name": "dat_outcome",
+      "displayName": "Outcome",
+      "isGlobal": true,
+      "valueBase": 100000000,
+      "options": [
+        { "label": "Advanced Opportunity", "value": 100000000 },
+        { "label": "Neutral", "value": 100000001 },
+        { "label": "Stalled", "value": 100000002 },
+        { "label": "Won Technical Decision", "value": 100000003 }
+      ]
+    },
+    {
+      "name": "dat_assettype",
+      "displayName": "Asset Type",
+      "isGlobal": true,
+      "valueBase": 100000000,
+      "options": [
+        { "label": "GitHub Repo", "value": 100000000 },
+        { "label": "Deployed Sandbox", "value": 100000001 },
+        { "label": "Script / Runbook", "value": 100000002 },
+        { "label": "Recorded Video", "value": 100000003 },
+        { "label": "Interactive Sandbox", "value": 100000004 },
+        { "label": "Slide-embedded", "value": 100000005 }
+      ]
+    },
+    {
+      "name": "dat_maturity",
+      "displayName": "Maturity",
+      "isGlobal": true,
+      "valueBase": 100000000,
+      "options": [
+        { "label": "Draft", "value": 100000000 },
+        { "label": "Field-ready", "value": 100000001 },
+        { "label": "Certified (Gold)", "value": 100000002 },
+        { "label": "Deprecated", "value": 100000003 }
+      ]
+    },
+    {
+      "name": "dat_assetgapreason",
+      "displayName": "Asset Gap Reason",
+      "isGlobal": true,
+      "valueBase": 100000000,
+      "options": [
+        { "label": "Not Yet Built", "value": 100000000 },
+        { "label": "Not Assetizable / Confidential", "value": 100000001 },
+        { "label": "One-off", "value": 100000002 },
+        { "label": "Used Partner Asset", "value": 100000003 }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "order": 1,
+      "schemaName": "dat_DemoDelivery",
+      "logicalName": "dat_demodelivery",
+      "displayName": "Demo Delivery",
+      "displayCollectionName": "Demo Deliveries",
+      "logicalSingularName": "dat_demodelivery",
+      "logicalPluralName": "dat_demodeliveries",
+      "entitySetName": "dat_demodeliveries",
+      "description": "A demo delivered by a seller to a customer on a date",
+      "ownership": "UserOwned",
+      "hasActivities": false,
+      "hasNotes": true,
+      "primaryColumn": {
+        "schemaName": "dat_DemoDeliveryName",
+        "displayName": "Name",
+        "description": "Short title for the demo delivery",
+        "type": "String",
+        "maxLength": 200,
+        "requiredLevel": "ApplicationRequired"
+      },
+      "columns": [
+        { "schemaName": "dat_deliverydate", "displayName": "Delivery Date", "logicalName": "dat_deliverydate", "type": "DateTime", "format": "DateOnly", "requiredLevel": "ApplicationRequired" },
+        { "schemaName": "dat_solutionarea", "displayName": "Solution Area", "logicalName": "dat_solutionarea", "type": "Picklist", "globalOptionSetName": "dat_solutionarea", "requiredLevel": "ApplicationRequired" },
+        { "schemaName": "dat_deliveryformat", "displayName": "Delivery Format", "logicalName": "dat_deliveryformat", "type": "Picklist", "globalOptionSetName": "dat_deliveryformat", "requiredLevel": "None" },
+        { "schemaName": "dat_salesstage", "displayName": "Sales Stage", "logicalName": "dat_salesstage", "type": "Picklist", "globalOptionSetName": "dat_deliverystage", "requiredLevel": "None" },
+        { "schemaName": "dat_outcome", "displayName": "Outcome", "logicalName": "dat_outcome", "type": "Picklist", "globalOptionSetName": "dat_outcome", "requiredLevel": "None" },
+        { "schemaName": "dat_audiencesize", "displayName": "Audience Size", "logicalName": "dat_audiencesize", "type": "Integer", "requiredLevel": "None" },
+        { "schemaName": "dat_assetgapreason", "displayName": "Asset Gap Reason", "logicalName": "dat_assetgapreason", "type": "Picklist", "globalOptionSetName": "dat_assetgapreason", "requiredLevel": "None" },
+        { "schemaName": "dat_linkedassetcount", "displayName": "Linked Asset Count", "logicalName": "dat_linkedassetcount", "type": "Integer", "rollup": true, "requiredLevel": "None" }
+      ],
+      "lookupColumns": [
+        { "schemaName": "dat_customer", "displayName": "Customer", "logicalName": "dat_customer", "type": "Lookup", "targetTable": "account", "requiredLevel": "None", "provisionVia": "provision-relationships.plan.json", "relationshipSchemaName": "dat_DemoDelivery_Account" },
+        { "schemaName": "dat_presenter", "displayName": "Presenter", "logicalName": "dat_presenter", "type": "Lookup", "targetTable": "systemuser", "requiredLevel": "None", "provisionVia": "provision-relationships.plan.json", "relationshipSchemaName": "dat_DemoDelivery_Presenter" }
+      ]
+    },
+    {
+      "order": 2,
+      "schemaName": "dat_DemoAsset",
+      "logicalName": "dat_demoasset",
+      "displayName": "Demo Asset",
+      "displayCollectionName": "Demo Assets",
+      "logicalSingularName": "dat_demoasset",
+      "logicalPluralName": "dat_demoassets",
+      "entitySetName": "dat_demoassets",
+      "description": "A reusable artifact that backs one or more demos; lives in a shared catalog",
+      "ownership": "OrganizationOwned",
+      "hasActivities": false,
+      "hasNotes": true,
+      "primaryColumn": {
+        "schemaName": "dat_DemoAssetName",
+        "displayName": "Name",
+        "description": "Name of the reusable demo asset",
+        "type": "String",
+        "maxLength": 200,
+        "requiredLevel": "ApplicationRequired"
+      },
+      "columns": [
+        { "schemaName": "dat_assettype", "displayName": "Asset Type", "logicalName": "dat_assettype", "type": "Picklist", "globalOptionSetName": "dat_assettype", "requiredLevel": "ApplicationRequired" },
+        { "schemaName": "dat_solutionarea", "displayName": "Solution Area", "logicalName": "dat_solutionarea", "type": "Picklist", "globalOptionSetName": "dat_solutionarea", "requiredLevel": "ApplicationRequired" },
+        { "schemaName": "dat_maturity", "displayName": "Maturity", "logicalName": "dat_maturity", "type": "Picklist", "globalOptionSetName": "dat_maturity", "requiredLevel": "None" },
+        { "schemaName": "dat_asseturl", "displayName": "Asset URL", "logicalName": "dat_asseturl", "type": "String", "format": "Url", "maxLength": 400, "requiredLevel": "None" },
+        { "schemaName": "dat_description", "displayName": "Description", "logicalName": "dat_description", "type": "Memo", "maxLength": 2000, "requiredLevel": "None" },
+        { "schemaName": "dat_reusecount", "displayName": "Reuse Count", "logicalName": "dat_reusecount", "type": "Integer", "rollup": true, "requiredLevel": "None" },
+        { "schemaName": "dat_lastusedon", "displayName": "Last Used On", "logicalName": "dat_lastusedon", "type": "DateTime", "format": "DateOnly", "rollup": true, "requiredLevel": "None" }
+      ],
+      "lookupColumns": [
+        { "schemaName": "dat_maintainer", "displayName": "Maintainer", "logicalName": "dat_maintainer", "type": "Lookup", "targetTable": "systemuser", "requiredLevel": "None", "provisionVia": "provision-relationships.plan.json", "relationshipSchemaName": "dat_DemoAsset_Maintainer" }
+      ]
+    },
+    {
+      "order": 3,
+      "schemaName": "dat_DemoAssetUsage",
+      "logicalName": "dat_demoassetusage",
+      "displayName": "Demo Asset Usage",
+      "displayCollectionName": "Demo Asset Usages",
+      "logicalSingularName": "dat_demoassetusage",
+      "logicalPluralName": "dat_demoassetusages",
+      "entitySetName": "dat_demoassetusages",
+      "description": "Junction record: a demo delivery reused a demo asset",
+      "ownership": "UserOwned",
+      "hasActivities": false,
+      "hasNotes": false,
+      "primaryColumn": {
+        "schemaName": "dat_DemoAssetUsageName",
+        "displayName": "Name",
+        "description": "Auto-composed link name",
+        "type": "String",
+        "maxLength": 300,
+        "requiredLevel": "ApplicationRequired"
+      },
+      "columns": [
+        { "schemaName": "dat_usagenote", "displayName": "Usage Note", "logicalName": "dat_usagenote", "type": "String", "maxLength": 200, "requiredLevel": "None" }
+      ],
+      "lookupColumns": [
+        { "schemaName": "dat_demodelivery", "displayName": "Demo Delivery", "logicalName": "dat_demodelivery", "type": "Lookup", "targetTable": "dat_demodelivery", "requiredLevel": "ApplicationRequired", "provisionVia": "provision-relationships.plan.json", "relationshipSchemaName": "dat_DemoDelivery_Usage" },
+        { "schemaName": "dat_demoasset", "displayName": "Demo Asset", "logicalName": "dat_demoasset", "type": "Lookup", "targetTable": "dat_demoasset", "requiredLevel": "ApplicationRequired", "provisionVia": "provision-relationships.plan.json", "relationshipSchemaName": "dat_DemoAsset_Usage" }
+      ]
+    }
+  ]
+}

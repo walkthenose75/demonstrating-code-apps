@@ -1,0 +1,15 @@
+{
+  "_comment": "AIC (AI Consumption) pricing config. EDIT THESE RATES to match your contract / provider list prices. All token rates are USD per 1,000,000 tokens. Cache-aware: Anthropic-style caching bills cache WRITES above the input rate and cache READS well below it. 'copilotMultiplier' is the GitHub Copilot premium-request multiplier used to derive credits from user turns. Model keys are matched by longest-prefix against the telemetry model name (e.g. 'claude-opus-4.8' -> 'claude-opus'). 'usdPerCredit', when set to a number, adds a monetary credit-equivalent (cost / usdPerCredit).",
+  "currency": "USD",
+  "usdPerCredit": null,
+  "models": {
+    "claude-opus":   { "input": 15.0, "output": 75.0, "cacheWrite": 18.75, "cacheRead": 1.50,  "copilotMultiplier": 10 },
+    "claude-sonnet": { "input": 3.0,  "output": 15.0, "cacheWrite": 3.75,  "cacheRead": 0.30,  "copilotMultiplier": 1 },
+    "claude-haiku":  { "input": 1.0,  "output": 5.0,  "cacheWrite": 1.25,  "cacheRead": 0.10,  "copilotMultiplier": 0.33 },
+    "gpt-5-mini":    { "input": 0.25, "output": 2.0,  "cacheWrite": 0.25,  "cacheRead": 0.025, "copilotMultiplier": 0 },
+    "gpt-5":         { "input": 1.25, "output": 10.0, "cacheWrite": 1.25,  "cacheRead": 0.125, "copilotMultiplier": 1 },
+    "gemini-3":      { "input": 1.25, "output": 10.0, "cacheWrite": 1.25,  "cacheRead": 0.31,  "copilotMultiplier": 1 },
+    "gemini":        { "input": 0.30, "output": 2.50, "cacheWrite": 0.30,  "cacheRead": 0.075, "copilotMultiplier": 0.25 },
+    "default":       { "input": 3.0,  "output": 15.0, "cacheWrite": 3.75,  "cacheRead": 0.30,  "copilotMultiplier": 1 }
+  }
+}

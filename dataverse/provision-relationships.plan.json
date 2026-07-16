@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "artifact": "provision-relationships.plan.json",
+    "purpose": "Create the 5 lookup (ManyToOne) relationships for the Project Tracker app. Runs AFTER provision-tables.plan.json so every referenced and referencing table already exists.",
+    "generatedFrom": "dataverse/planning-payload.json",
+    "publisherPrefix": "dat",
+    "solutionUniqueName": "<solution-name>",
+    "goldenSequenceStep": "Step 5 (Lookup columns / relationships). Each relationship also creates its lookup column on the referencing table.",
+    "dependsOn": "provision-tables.plan.json",
+    "notes": [
+      "A ManyToOne relationship creates the lookup column on the referencing (many) entity that points at the referenced (one) entity.",
+      "Entity logical names below are the singular Dataverse logical names expected by dv-metadata.",
+      "Rollup columns (dat_linkedassetcount, dat_reusecount, dat_lastusedon) depend on these relationships and are recalculated by the platform after the relationships exist.",
+      "Run every dv-metadata call with the solution context so the relationships land in <solution-name>."
+    ]
+  },
+  "relationships": [
+    {
+      "order": 1,
+      "type": "ManyToOne",
+      "schemaName": "dat_DemoDelivery_Account",
+      "referencedEntityLogicalName": "account",
+      "referencedEntitySetName": "accounts",
+      "referencingEntityLogicalName": "dat_demodelivery",
+      "referencingEntitySetName": "dat_demodeliveries",
+      "lookupSchemaName": "dat_customer",
+      "lookupDisplayName": "Customer",
+      "requiredLevel": "None",
+      "cascadeConfiguration": "Referential",
+      "note": "Demo Delivery -> Account (Customer). Referential: deleting an account leaves deliveries but clears the lookup."
+    },
+    {
+      "order": 2,
+      "type": "ManyToOne",
+      "schemaName": "dat_DemoDelivery_Presenter",
+      "referencedEntityLogicalName": "systemuser",
+      "referencedEntitySetName": "systemusers",
+      "referencingEntityLogicalName": "dat_demodelivery",
+      "referencingEntitySetName": "dat_demodeliveries",
+      "lookupSchemaName": "dat_presenter",
+      "lookupDisplayName": "Presenter",
+      "requiredLevel": "None",
+      "cascadeConfiguration": "Referential",
+      "note": "Demo Delivery -> User (Presenter/Seller). Reuses OOB systemuser."
+    },
+    {
+      "order": 3,
+      "type": "ManyToOne",
+      "schemaName": "dat_DemoAsset_Maintainer",
+      "referencedEntityLogicalName": "systemuser",
+      "referencedEntitySetName": "systemusers",
+      "referencingEntityLogicalName": "dat_demoasset",
+      "referencingEntitySetName": "dat_demoassets",
+      "lookupSchemaName": "dat_maintainer",
+      "lookupDisplayName": "Maintainer",
+      "requiredLevel": "None",
+      "cascadeConfiguration": "Referential",
+      "note": "Demo Asset -> User (Maintainer). Reuses OOB systemuser."
+    },
+    {
+      "order": 4,
+      "type": "ManyToOne",
+      "schemaName": "dat_DemoDelivery_Usage",
+      "referencedEntityLogicalName": "dat_demodelivery",
+      "referencedEntitySetName": "dat_demodeliveries",
+      "referencingEntityLogicalName": "dat_demoassetusage",
+      "referencingEntitySetName": "dat_demoassetusages",
+      "lookupSchemaName": "dat_demodelivery",
+      "lookupDisplayName": "Demo Delivery",
+      "requiredLevel": "ApplicationRequired",
+      "cascadeConfiguration": "Cascade",
+      "note": "Demo Asset Usage -> Demo Delivery (parent side of junction). Cascade: deleting a delivery deletes its usage rows."
+    },
+    {
+      "order": 5,
+      "type": "ManyToOne",
+      "schemaName": "dat_DemoAsset_Usage",
+      "referencedEntityLogicalName": "dat_demoasset",
+      "referencedEntitySetName": "dat_demoassets",
+      "referencingEntityLogicalName": "dat_demoassetusage",
+      "referencingEntitySetName": "dat_demoassetusages",
+      "lookupSchemaName": "dat_demoasset",
+      "lookupDisplayName": "Demo Asset",
+      "requiredLevel": "ApplicationRequired",
+      "cascadeConfiguration": "Restrict",
+      "note": "Demo Asset Usage -> Demo Asset (catalog side of junction). Restrict: an asset cannot be deleted while it is still referenced by a usage row."
+    }
+  ]
+}

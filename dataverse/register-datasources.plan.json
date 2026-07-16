@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "artifact": "register-datasources.plan.json",
+    "purpose": "Bind Dataverse tables and connectors to the Project Tracker Code App via `pac code add-data-source`, regenerating src/generated/** for each entry.",
+    "generatedFrom": "dataverse/planning-payload.json + power.config.json",
+    "app": "Project Tracker",
+    "dependsOn": ["provision-tables.plan.json", "provision-relationships.plan.json"],
+    "goldenSequenceStep": "Step 8 (register data sources) — runs only AFTER PublishAllXml has published every table, column, and relationship.",
+    "notes": [
+      "Dataverse data sources use the singular entity logical name for -t and require NO connection ID (they bind through the environment's Dataverse connection).",
+      "Non-Dataverse connectors require a live connection ID (-c). Discover it with `pac connection list` (or the /list-connections skill) and substitute for the <CONN_*> placeholder — do not invent one.",
+      "Prefer the Code Apps plugin skills (/add-dataverse, /add-office365) which drive these commands and regenerate the typed service/model files.",
+      "Each command edits power.config.json (adds a databaseReference or connectionReference) and writes src/generated/services + src/generated/models."
+    ]
+  },
+  "dataSources": [
+    {
+      "order": 1,
+      "kind": "dataverse-table-custom",
+      "apiId": "dataverse",
+      "tableLogicalName": "dat_demodelivery",
+      "entitySetName": "dat_demodeliveries",
+      "displayName": "Demo Delivery",
+      "requiresLiveConnectionId": false,
+      "skill": "/add-dataverse",
+      "command": "pac code add-data-source -a dataverse -t dat_demodelivery"
+    },
+    {
+      "order": 2,
+      "kind": "dataverse-table-custom",
+      "apiId": "dataverse",
+      "tableLogicalName": "dat_demoasset",
+      "entitySetName": "dat_demoassets",
+      "displayName": "Demo Asset",
+      "requiresLiveConnectionId": false,
+      "skill": "/add-dataverse",
+      "command": "pac code add-data-source -a dataverse -t dat_demoasset"
+    },
+    {
+      "order": 3,
+      "kind": "dataverse-table-custom",
+      "apiId": "dataverse",
+      "tableLogicalName": "dat_demoassetusage",
+      "entitySetName": "dat_demoassetusages",
+      "displayName": "Demo Asset Usage",
+      "requiresLiveConnectionId": false,
+      "skill": "/add-dataverse",
+      "command": "pac code add-data-source -a dataverse -t dat_demoassetusage"
+    },
+    {
+      "order": 4,
+      "kind": "dataverse-table-oob",
+      "apiId": "dataverse",
+      "tableLogicalName": "account",
+      "entitySetName": "accounts",
+      "displayName": "Account (Customer)",
+      "requiresLiveConnectionId": false,
+      "skill": "/add-dataverse",
+      "command": "pac code add-data-source -a dataverse -t account",
+      "note": "Reused OOB table targeted by dat_customer. Register so the app can read customer names."
+    },
+    {
+      "order": 5,
+      "kind": "dataverse-table-oob",
+      "apiId": "dataverse",
+      "tableLogicalName": "systemuser",
+      "entitySetName": "systemusers",
+      "displayName": "User (Presenter / Maintainer)",
+      "requiresLiveConnectionId": false,
+      "skill": "/add-dataverse",
+      "command": "pac code add-data-source -a dataverse -t systemuser",
+      "note": "Reused OOB table targeted by dat_presenter and dat_maintainer."
+    },
+    {
+      "order": 6,
+      "kind": "connector",
+      "apiId": "shared_office365users",
+      "connectionIdPlaceholder": "<CONN_OFFICE365USERS>",
+      "displayName": "Office 365 Users",
+      "requiresLiveConnectionId": true,
+      "skill": "/add-office365",
+      "command": "pac code add-data-source -a shared_office365users -c <CONN_OFFICE365USERS>",
+      "note": "Provides seller/presenter profile and people-search data. Discover the connection ID with `pac connection list` (filter shared_office365users) or /list-connections before running."
+    }
+  ]
+}

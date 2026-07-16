@@ -1,77 +1,65 @@
-# Power SDK Instructions Start
-## Overview
+# Power Apps Code Apps - GitHub Copilot Project Instructions
 
-This guide explains how to initialize an app, add a data source using the Power SDK CLI and generate the corresponding Models and Services, and publish the app.
+You are assisting with a Power Apps Code Apps solution built with TypeScript, React, Dataverse, Power Platform CLI, GitHub, and the microsoft/power-platform-skills starter template.
 
-**Always continue immediately** without asking for confirmation at each step.
+## How to use this workspace
 
-## Planning Interview Style — ALWAYS ON
+This repo uses three layers of AI guidance:
 
-Whenever the user is describing an app idea, business problem, workflow, scope, or any not-yet-built behavior — i.e. the conversation is in planning, not implementation — interview them using the **grilling cadence**, not a structured questionnaire:
+1. **Instruction files** define the process and methodology.
+2. **Power Platform Skills agents** provide specialized implementation guidance.
+3. **Custom repo agents** provide orchestration, governance, QA, documentation, and ALM oversight.
 
-1. **Ask one atomic question at a time.** Never batch multiple questions. A compound question joined by "and", "also", "plus", or a comma is two questions — split it and ask the first one.
-2. **Always supply your own recommended answer** with the question. The user can accept, reject, or refine. This is faster than open-ended prompts and exposes your assumptions for challenge.
-3. **Present options as a lettered list — every time.** When the question has more than one plausible answer, lay choices out as `**A)** …`, `**B)** …`, `**C)** …` (one per line), mark your recommendation with `*(recommended)*`, and invite the user to reply with just a letter — or multiple like `A, C` if more than one applies. Never bury options inline in the question text.
-4. **Walk depth-first.** When an answer reveals a dependency, resolve the dependency before moving sideways to the next topic.
-5. **Read before you ask.** If a question can be answered by exploring the codebase, reading existing solution metadata, querying Dataverse schema, or consulting `CONTEXT.md`, do that and surface what you found; only ask if it's still ambiguous.
-6. **Sharpen fuzzy language into `CONTEXT.md`** at the repo root as terms are resolved. Update inline, not in batches. When a glossary term is canonicalized, propose the bridge: `CONTEXT.md` term → Dataverse `DisplayName` in `planning-payload.json` → `DataverseFieldLabel` `fallback` prop.
-7. **Offer an ADR in `docs/adr/`** only when all three hold: hard to reverse + surprising without context + real trade-off.
+Do not treat these as competing systems. Use them together.
 
-Full protocol — including PACAF-specific ADR triggers, the `CONTEXT.md` format, and integration with the 00a → 00b → 00c → 00d phases — lives in `.github/instructions/00e-grill-and-document.instructions.md`. Read it whenever a planning conversation starts; do not skip to implementation while the business narrative is still unstable.
+## Always prefer the starter template process
 
-## CLI Command
+Before planning or implementing a task, look for the most relevant instruction file in the workspace. The starter template instruction files are the source of truth for the build process.
 
-Use the following command to initialize an app:
+Common instruction files include:
 
-```bash
-pac code init -n <app name> -env <environmentId>
-```
+- `00-before-you-start.instructions.md`
+- `00-environment-setup.instructions.md`
+- `00-prereq-gate.instructions.md`
+- `00a-business-problem-decomposition.instructions.md`
+- `00b-scope-refinement-and-solution-shaping.instructions.md`
+- `00c-solution-concept-to-dataverse-planning.instructions.md`
+- `00d-prototype-validation.instructions.md`
+- `00e-grill-and-document.instructions.md`
+- `01-scaffold.instructions.md`
+- `02-connectors.instructions.md`
+- `03-components.instructions.md`
+- `04-deployment.instructions.md`
+- `05-testing.instructions.md`
+- `06-security.instructions.md`
+- `07-dataverse-schema.instructions.md`
+- `07a-existing-schema-discovery.instructions.md`
+- `07b-org-structure-and-security.instructions.md`
+- `08-copilot-studio.instructions.md`
+- `09-form-field-pattern.instructions.md`
+- `10-publishing.instructions.md`
 
-**Example:**
+## Core principles
 
-```bash
-pac code init -n "Asset Tracker" -env "0aa4969d-c8e7-e0a7-9bf8-6925c5922de3"
-```
+- Treat generated code as a first draft that must be reviewed, tested, and simplified before acceptance.
+- Prefer clear, maintainable TypeScript over clever abstractions.
+- Keep Power Platform governance, ALM, security, and licensing implications visible in recommendations.
+- Use Dataverse as the primary system of record unless the user explicitly asks for another data source.
+- Keep app logic separated into UI components, generated/client services, shared utilities, configuration, and deployment scripts.
+- Do not hard-code environment-specific values, IDs, URLs, secrets, tenant names, or connection details.
+- Use environment variables or documented configuration patterns for values that differ across dev, test, and prod.
+- When creating or changing files, explain the purpose of each change and call out validation steps.
+- If a starter template instruction file conflicts with a custom agent instruction, prefer the starter template instruction unless the user explicitly overrides it.
 
-Use the following command to add a data source:
+## Recommended operating model
 
-```bash
-pac code add-data-source -a <apiId> -c <connectionId>
-```
+- Use **PowerApps CodeApps Orchestrator** to define scope, backlog, and next-agent routing.
+- Use Microsoft Power Platform Skills agents for specialized implementation work such as data modeling, screens, permissions, generated pages, web API integration, and offline profile planning.
+- Use custom repo agents for ALM, QA/security, documentation, and cross-workstream governance.
 
-**Example:**
+## Response style
 
-```bash
-pac code add-data-source -a "shared_office365users" -c "aa35d97110f747a49205461cbfcf8558"
-```
-
-If additional parameters such as table and dataset are required, use:
-
-```bash
-pac code add-data-source -a <apiId> -c <connectionId> -t <tableName> -d <datasetName>
-```
-
-**Example:**
-
-```bash
-pac code add-data-source -a "shared_sql" -c "12767db082494ab482618ce5703fe6e9" -t "[dbo].[MobileDeviceInventory]" -d "paconnectivitysql0425.database.windows.net,paruntimedb"
-```
-
-Use the following command to publish an app:
-
-```bash
-npm run build
-pac code push
-```
-
-**Example:**
-
-```bash
-pac code push
-```
-
-## Using Model and Service
-
-- Read the files under src\Models and src\Services folder for data binding.
-- Read the files under .power\schemas folder for other schema reference.
-# Power SDK Instructions End
+- Be concise but complete.
+- Prefer numbered implementation steps for build work.
+- Prefer code blocks for commands and file contents.
+- Avoid vague statements like "configure it"; provide explicit file names, commands, and validation steps.
