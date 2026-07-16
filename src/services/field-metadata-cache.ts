@@ -3,6 +3,9 @@
 // backed by the generated service getMetadata() call.
 
 import type { DataverseFieldMetadata, DataverseFieldRequiredLevel } from '@/services/data-contracts';
+import { Pt_projectsService } from '@/generated/services/Pt_projectsService';
+import { Pt_resourcesService } from '@/generated/services/Pt_resourcesService';
+import { Pt_assignmentsService } from '@/generated/services/Pt_assignmentsService';
 
 // ── RequiredLevel mapping (handles both string names and numeric values) ──
 
@@ -38,8 +41,9 @@ interface MetadataServiceEntry {
 // Without an entry, metadata lookups for that table return null (no asterisks,
 // no maxLength, no min/max).
 export const metadataServiceRegistry: Record<string, MetadataServiceEntry> = {
-  // Example after registering msfttrp_trips:
-  // msfttrp_trips: Msfttrp_tripsService as unknown as MetadataServiceEntry,
+  pt_project: Pt_projectsService as unknown as MetadataServiceEntry,
+  pt_resource: Pt_resourcesService as unknown as MetadataServiceEntry,
+  pt_assignment: Pt_assignmentsService as unknown as MetadataServiceEntry,
 };
 
 const tableMetadataCache = new Map<string, Promise<Map<string, DataverseFieldMetadata>>>();

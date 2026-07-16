@@ -10,5 +10,23 @@
   "localAppUrl": "http://localhost:3000",
   "logoPath": "Default",
   "connectionReferences": {},
-  "databaseReferences": {}
+  "databaseReferences": {
+    "default.cds": {
+      "dataSources": {
+        "projects": {
+          "entitySetName": "pt_projects",
+          "logicalName": "pt_project"
+        },
+        "resources": {
+          "entitySetName": "pt_resources",
+          "logicalName": "pt_resource"
+        },
+        "assignments": {
+          "entitySetName": "pt_assignments",
+          "logicalName": "pt_assignment"
+        }
+      },
+      "environmentVariableName": ""
+    }
+  }
 }

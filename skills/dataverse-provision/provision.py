@@ -160,9 +160,9 @@ def make_credential(args):
         except OSError:
             pass
 
-    # Enable a persistent token cache + saved AuthenticationRecord so the
-    # interactive sign-in survives across process runs (subsequent provisioning
-    # commands reuse the token silently instead of re-prompting a device code).
+    # Persist the token cache AND the AuthenticationRecord so the interactive
+    # sign-in survives across process runs. We authenticate up front (single
+    # device-code flow, long window) and reuse silently thereafter.
     rec_path = os.environ.get("DVP_AUTH_RECORD_FILE", "dataverse/.authrecord.json")
     try:
         from azure.identity import (  # noqa: WPS433
@@ -182,10 +182,13 @@ def make_credential(args):
             prompt_callback=_prompt,
             cache_persistence_options=cache_opts,
             authentication_record=record,
+            # Give the human a full 15 minutes to complete a SINGLE device code
+            # instead of the short default that expires mid-conversation.
+            timeout=900,
         )
         if record is None:
-            # Force the interactive flow now and persist the record for reuse.
-            new_record = cred.authenticate()
+            # One interactive flow now; persist the record so later runs are silent.
+            new_record = cred.authenticate(scopes=[_dataverse_scope(args.url)])
             try:
                 with open(rec_path, "w", encoding="utf-8") as fh:
                     fh.write(new_record.serialize())
@@ -195,7 +198,14 @@ def make_credential(args):
     except Exception:
         return DeviceCodeCredential(
             tenant_id=args.tenant, client_id=AZ_CLI_CLIENT, prompt_callback=_prompt,
+            timeout=900,
         )
+
+
+def _dataverse_scope(url: str) -> str:
+    """Return the Dataverse .default scope for the org URL (for pre-auth)."""
+    base = (url or "").rstrip("/")
+    return f"{base}/.default" if base else "https://globaldisco.crm.dynamics.com/.default"
 
 
 def ensure_solution(client, *, prefix: str, solution_name: str,

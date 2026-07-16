@@ -12,6 +12,15 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup/setup.ts'],
     css: true,
+    // The generated Dataverse services import @microsoft/power-apps/data, whose
+    // dist uses extensionless ESM re-exports (e.g. './multiSelectPicklistUtils').
+    // Inline the package so Vite resolves those specifiers instead of Node's
+    // strict ESM loader, which errors with "Cannot find module".
+    server: {
+      deps: {
+        inline: [/@microsoft\/power-apps/],
+      },
+    },
     include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
