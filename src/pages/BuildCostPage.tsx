@@ -6,8 +6,10 @@ import {
   Timer24Regular,
   BrainCircuit24Regular,
   Flash24Regular,
+  Person24Regular,
+  PeopleTeam24Regular,
 } from '@fluentui/react-icons';
-import { aicUsage } from '@/data/aicUsage';
+import { aicUsage, manualBuildComparison } from '@/data/aicUsage';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionCard } from '@/components/ui/SectionCard';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -91,6 +93,15 @@ export function BuildCostPage() {
   const saved = naive - u.totals.costUsd;
   const savedPct = Math.round((saved / naive) * 100);
 
+  // Manual (hand-built) baseline vs the actual AI-agent build.
+  const mc = manualBuildComparison;
+  const manualHours = mc.tasks.reduce((acc, t) => acc + t.hours, 0);
+  const manualInternal = manualHours * mc.internalRateUsd;
+  const manualConsultant = manualHours * mc.consultantRateUsd;
+  const aiActiveHours = u.time.activeSeconds / 3600;
+  const savedVsConsultant = manualConsultant - u.totals.costUsd;
+  const pctVsConsultant = Math.round((savedVsConsultant / manualConsultant) * 100);
+
   return (
     <div className={styles.page}>
       <PageHeader
@@ -121,6 +132,68 @@ export function BuildCostPage() {
             </Body1>
           </div>
         </div>
+
+        <SectionCard title="Manual build vs AI agent" subtitle="What the same app would cost to build by hand">
+          <div className={styles.stats}>
+            <StatCard label="Manual · Consultant" value={formatUsd(manualConsultant)} hint={`${manualHours} hrs × $${mc.consultantRateUsd}/hr`} icon={<Person24Regular />} accentColor={COST_COLORS.cacheWrite} />
+            <StatCard label="Manual · Internal" value={formatUsd(manualInternal)} hint={`${manualHours} hrs × $${mc.internalRateUsd}/hr`} icon={<PeopleTeam24Regular />} accentColor={COST_COLORS.fresh} />
+            <StatCard label="AI Agent (actual)" value={formatUsd(u.totals.costUsd)} hint={`${humanizeSeconds(u.time.activeSeconds)} active generation`} icon={<BrainCircuit24Regular />} accentColor={COST_COLORS.output} />
+          </div>
+
+          <div className={styles.insight} style={{ marginTop: '16px' }}>
+            <Flash24Regular style={{ color: '#107c10', width: 32, height: 32 }} />
+            <div>
+              <div className={styles.insightBig}>{formatUsd(savedVsConsultant)} saved · {pctVsConsultant}%</div>
+              <Body1>
+                Building Project Tracker with an AI agent cost <strong>{formatUsd(u.totals.costUsd)}</strong> versus an
+                estimated <strong>{formatUsd(manualConsultant)}</strong> for a consultant ({manualHours} hrs × $
+                {mc.consultantRateUsd}/hr) or <strong>{formatUsd(manualInternal)}</strong> for an internal employee (${mc.internalRateUsd}/hr) —
+                and delivered in {humanizeSeconds(u.time.activeSeconds)} of active generation instead of {manualHours} hours of hands-on work.
+              </Body1>
+            </div>
+          </div>
+
+          <table className={styles.table} style={{ marginTop: '16px' }}>
+            <thead>
+              <tr>
+                <th className={styles.th}>Manual task</th>
+                <th className={`${styles.th} ${styles.num}`}>Hours</th>
+                <th className={`${styles.th} ${styles.num}`}>Internal @ ${mc.internalRateUsd}</th>
+                <th className={`${styles.th} ${styles.num}`}>Consultant @ ${mc.consultantRateUsd}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mc.tasks.map((t) => (
+                <tr key={t.task}>
+                  <td className={styles.td}>{t.task}</td>
+                  <td className={`${styles.td} ${styles.num}`}>{t.hours}</td>
+                  <td className={`${styles.td} ${styles.num}`}>{formatUsd(t.hours * mc.internalRateUsd)}</td>
+                  <td className={`${styles.td} ${styles.num}`}>{formatUsd(t.hours * mc.consultantRateUsd)}</td>
+                </tr>
+              ))}
+              <tr>
+                <td className={styles.td}><Text weight="semibold">Total manual effort</Text></td>
+                <td className={`${styles.td} ${styles.num}`}><Text weight="semibold">{manualHours}</Text></td>
+                <td className={`${styles.td} ${styles.num}`}><Text weight="semibold">{formatUsd(manualInternal)}</Text></td>
+                <td className={`${styles.td} ${styles.num}`}><Text weight="semibold">{formatUsd(manualConsultant)}</Text></td>
+              </tr>
+              <tr>
+                <td className={styles.td}>
+                  <span className={styles.modelName}>
+                    <BrainCircuit24Regular style={{ width: 18, height: 18, color: '#107c10' }} />
+                    AI agent (actual)
+                  </span>
+                </td>
+                <td className={`${styles.td} ${styles.num}`}>{aiActiveHours.toFixed(1)}</td>
+                <td className={`${styles.td} ${styles.num}`} colSpan={2}>
+                  <Text weight="semibold" style={{ color: '#107c10' }}>{formatUsd(u.totals.costUsd)}</Text> total consumption
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <Caption1 style={{ color: tokens.colorNeutralForeground4, marginTop: '10px', display: 'block' }}>{mc.note}</Caption1>
+        </SectionCard>
 
         <div className={styles.two}>
           <SectionCard title="Cost breakdown" subtitle="Where the money went">

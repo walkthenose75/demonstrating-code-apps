@@ -36,6 +36,26 @@ export interface AicCheckpoint {
   deltaCostUsd: number;
 }
 
+/** A single line item in the "what it would take to build this by hand" estimate. */
+export interface ManualBuildTask {
+  task: string;
+  hours: number;
+}
+
+/**
+ * Manual (human-built) baseline for the same app, so the dashboard can contrast
+ * an AI-agent build against a hand-built one on both time and cost.
+ * Hours are a transparent, line-item estimate for an experienced Power Platform
+ * maker building the equivalent app in the UI (Dataverse schema + data + 6
+ * screens + dashboards + CRUD). Rates are fully-loaded labor rates.
+ */
+export interface ManualBuildComparison {
+  internalRateUsd: number;   // fully-loaded internal employee rate ($/hr)
+  consultantRateUsd: number; // external consultant rate ($/hr)
+  tasks: ManualBuildTask[];  // sum of hours = estimated manual effort
+  note: string;
+}
+
 export interface AicUsage {
   capturedAt: string;
   currency: 'USD';
@@ -64,43 +84,43 @@ export interface AicUsage {
 }
 
 export const aicUsage: AicUsage = {
-  capturedAt: '2026-07-16T04:14:53Z',
+  capturedAt: '2026-07-16T15:36:29Z',
   currency: 'USD',
   totals: {
-    costUsd: 107.57,
-    credits: 460,
-    inputTokens: 32171281,
-    outputTokens: 309243,
-    cacheReadTokens: 30063512,
-    cacheWriteTokens: 2042762,
-    freshInputTokens: 65007,
-    userTurns: 46,
-    modelEvents: 287,
+    costUsd: 282.30,
+    credits: 590,
+    inputTokens: 93420844,
+    outputTokens: 699618,
+    cacheReadTokens: 88202362,
+    cacheWriteTokens: 5132707,
+    freshInputTokens: 85775,
+    userTurns: 59,
+    modelEvents: 664,
   },
   breakdown: {
-    freshInputUsd: 0.9751,
-    cacheReadUsd: 45.0953,
-    cacheWriteUsd: 38.3018,
-    outputUsd: 23.1932,
+    freshInputUsd: 1.2866,
+    cacheReadUsd: 132.3035,
+    cacheWriteUsd: 96.2383,
+    outputUsd: 52.4714,
   },
   time: {
-    wallSeconds: 39602,
-    activeSeconds: 4350,
-    firstActivity: '2026-07-15T17:14:51Z',
-    lastActivity: '2026-07-16T04:14:53Z',
+    wallSeconds: 63791,
+    activeSeconds: 10012,
+    firstActivity: '2026-07-15T21:53:18Z',
+    lastActivity: '2026-07-16T15:36:29Z',
   },
   models: [
     {
       model: 'claude-opus-4.8',
       vendor: 'Anthropic',
-      inputTokens: 32171281,
-      freshInputTokens: 65007,
-      cacheReadTokens: 30063512,
-      cacheWriteTokens: 2042762,
-      outputTokens: 309243,
-      costUsd: 107.57,
-      credits: 460,
-      events: 287,
+      inputTokens: 93420844,
+      freshInputTokens: 85775,
+      cacheReadTokens: 88202362,
+      cacheWriteTokens: 5132707,
+      outputTokens: 699618,
+      costUsd: 282.30,
+      credits: 590,
+      events: 664,
       rates: { input: 15.0, output: 75.0, cacheWrite: 18.75, cacheRead: 1.5, copilotMultiplier: 10 },
     },
   ],
@@ -126,7 +146,41 @@ export const aicUsage: AicUsage = {
       cumulativeCredits: 460,
       deltaCostUsd: 35.58,
     },
+    {
+      label: 'go-live · lookups + seed + deploy to dev',
+      timestamp: '2026-07-16T15:32:47Z',
+      cumulativeCostUsd: 276.13,
+      cumulativeCredits: 570,
+      deltaCostUsd: 168.57,
+    },
+    {
+      label: 'edit/delete projects + manual-vs-AI comparison',
+      timestamp: '2026-07-16T15:47:58Z',
+      cumulativeCostUsd: 282.30,
+      cumulativeCredits: 590,
+      deltaCostUsd: 6.17,
+    },
   ],
   basis:
-    'Cache-aware estimate across all 3 build sessions using public Anthropic list prices (Opus: $15/$75 per 1M in/out, cache write $18.75, cache read $1.50). Credits are GitHub Copilot premium requests (turns x10 for Opus). Wall time includes idle gaps; active generation is real compute time.',
+    'Cache-aware estimate across all build sessions using public Anthropic list prices (Opus: $15/$75 per 1M in/out, cache write $18.75, cache read $1.50). Credits are GitHub Copilot premium requests (turns x10 for Opus). Wall time includes idle gaps; active generation is real compute time.',
+};
+
+export const manualBuildComparison: ManualBuildComparison = {
+  internalRateUsd: 75,
+  consultantRateUsd: 250,
+  tasks: [
+    { task: 'Dataverse schema — 3 tables, ~30 columns, 5 lookups, choice sets', hours: 6 },
+    { task: 'Sample data entry — 117 records (accounts, resources, projects, assignments)', hours: 5 },
+    { task: 'App shell, navigation & theming (6-page layout)', hours: 4 },
+    { task: 'Projects experience — table, search, filters, new/edit/delete + validation', hours: 9 },
+    { task: 'Resources experience — list, detail, forms', hours: 6 },
+    { task: 'Assignments experience — junction records & linking', hours: 4 },
+    { task: 'Portfolio dashboard — KPIs, donut & bar charts', hours: 8 },
+    { task: 'AI Build Cost dashboard page', hours: 4 },
+    { task: 'Required-field metadata / form-rule pattern', hours: 3 },
+    { task: 'Styling polish & responsive layout', hours: 5 },
+    { task: 'Testing, iteration & bug-fixing', hours: 6 },
+  ],
+  note:
+    'Manual effort is a transparent, line-item estimate for an experienced Power Platform maker building the equivalent app by hand in the UI. Internal rate is a fully-loaded employee cost; consultant rate is a typical external day-rate equivalent. Compared against the actual AI-agent consumption cost captured above.',
 };
