@@ -138,7 +138,7 @@ def make_credential(args):
     # Azure CLI public client id — works for device-code against Dataverse.
     AZ_CLI_CLIENT = "04b07795-8ddb-461a-bbee-02f9e1bf7b46"
     if args.auth == "azurecli":
-        return AzureCliCredential()
+        return AzureCliCredential(tenant_id=args.tenant) if getattr(args, "tenant", None) else AzureCliCredential()
     if args.auth == "env":
         return ClientSecretCredential(
             tenant_id=os.environ["AZURE_TENANT_ID"],
@@ -289,6 +289,74 @@ def ensure_solution(client, *, prefix: str, solution_name: str,
     return solution_name
 
 
+def _col_logical(col) -> str:
+    """Normalize a list_columns() item to its lowercase logical name.
+
+    The Dataverse SDK returns full attribute-metadata dicts (not plain strings),
+    so pull LogicalName/SchemaName out; tolerate plain strings too.
+    """
+    if isinstance(col, str):
+        return col.lower()
+    if isinstance(col, dict):
+        name = col.get("LogicalName") or col.get("SchemaName") or ""
+        return str(name).lower()
+    name = getattr(col, "LogicalName", None) or getattr(col, "logical_name", None) or ""
+    return str(name).lower()
+
+
+def _add_columns_idempotent(client, schema_name: str, columns: dict, log) -> None:
+    """Add columns one at a time, skipping any that already exist.
+
+    Guards against a stale/incomplete existing-column list: if the server says a
+    column already exists we treat it as reconciled instead of aborting the run.
+    """
+    for key, spec in columns.items():
+        try:
+            client.tables.add_columns(schema_name, {key: spec})
+        except Exception as exc:  # noqa: BLE001
+            if "already exists" in str(exc).lower():
+                log(f"     column {key} already exists — skip")
+                continue
+            raise
+
+
+def _create_lookup(client, *, referencing: str, field: str, target: str,
+                   display: str, required: bool, solution: str, prefix: str):
+    """Create a lookup relationship with a publisher-prefixed relationship schema
+    name. The SDK's create_lookup_field auto-names the relationship
+    ``{referenced}_{referencing}_{field}``, which Dataverse rejects because
+    relationship names must start with the solution publisher's prefix.
+    """
+    from PowerPlatform.Dataverse.models.relationship import (  # noqa: WPS433
+        CascadeConfiguration,
+        LookupAttributeMetadata,
+        OneToManyRelationshipMetadata,
+        CASCADE_BEHAVIOR_REMOVE_LINK,
+    )
+    from PowerPlatform.Dataverse.models.labels import Label, LocalizedLabel  # noqa: WPS433
+
+    referencing_lower = referencing.lower()
+    referenced_lower = target.lower()
+    field_suffix = field[len(prefix) + 1:] if field.lower().startswith(f"{prefix.lower()}_") else field
+    rel_name = f"{referencing_lower}_{field_suffix.lower()}"
+    if not rel_name.lower().startswith(f"{prefix.lower()}_"):
+        rel_name = f"{prefix}_{rel_name}"
+
+    lookup = LookupAttributeMetadata(
+        schema_name=field,
+        display_name=Label(localized_labels=[LocalizedLabel(label=display or target, language_code=1033)]),
+        required_level="ApplicationRequired" if required else "None",
+    )
+    relationship = OneToManyRelationshipMetadata(
+        schema_name=rel_name,
+        referenced_entity=referenced_lower,
+        referencing_entity=referencing_lower,
+        referenced_attribute=f"{referenced_lower}id",
+        cascade_configuration=CascadeConfiguration(delete=CASCADE_BEHAVIOR_REMOVE_LINK),
+    )
+    return client.tables.create_one_to_many_relationship(lookup, relationship, solution=solution)
+
+
 def main() -> int:
     here = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser(description="Provision Dataverse schema from a PACAF planning payload")
@@ -398,13 +466,13 @@ def main() -> int:
         else:
             try:
                 cols = client.tables.list_columns(logical) or []
-                have = {c.lower() for c in cols}
+                have = {_col_logical(c) for c in cols} - {""}
             except Exception:
                 have = {c.lower() for c in getattr(existing, "columns", {}) or {}}
             missing = {k: v for k, v in entry["columns"].items() if k.lower() not in have}
             if missing:
-                client.tables.add_columns(t["schemaName"], missing)
-                log(f"   table {t['schemaName']} exists — added {len(missing)} missing cols")
+                _add_columns_idempotent(client, t["schemaName"], missing, log)
+                log(f"   table {t['schemaName']} exists — reconciled {len(missing)} col(s)")
             else:
                 log(f"   table {t['schemaName']} exists — up to date")
 
@@ -416,7 +484,7 @@ def main() -> int:
             target = resolve_target(lk["target"], tables_by_logical)
             try:
                 existing_rels = client.tables.list_columns(referencing)
-                have = {c.lower() for c in (existing_rels or [])}
+                have = {_col_logical(c) for c in (existing_rels or [])} - {""}
             except Exception:
                 have = set()
             if lk["field"].lower() in have:
@@ -429,17 +497,22 @@ def main() -> int:
             while True:
                 attempts += 1
                 try:
-                    client.tables.create_lookup_field(
-                        referencing_table=referencing,
-                        lookup_field_name=lk["field"],
-                        referenced_table=target,
-                        display_name=lk["display"],
+                    _create_lookup(
+                        client,
+                        referencing=referencing,
+                        field=lk["field"],
+                        target=target,
+                        display=lk["display"],
                         required=lk["required"],
                         solution=args.solution,
+                        prefix=prefix,
                     )
                     break
                 except Exception as exc:  # noqa: BLE001
                     msg = str(exc)
+                    if "already exists" in msg.lower() or "duplicate" in msg.lower():
+                        log(f"   lookup {lk['field']} already exists — skip")
+                        break
                     transient = "EntityCustomization" in msg or "try again later" in msg
                     if transient and attempts <= 8:
                         wait = min(5 * attempts, 30)
