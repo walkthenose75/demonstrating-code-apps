@@ -145,6 +145,36 @@ def make_credential(args):
             client_id=os.environ["AZURE_CLIENT_ID"],
             client_secret=os.environ["AZURE_CLIENT_SECRET"],
         )
+    if args.auth == "interactive":
+        if not args.tenant:
+            sys.exit("ERROR: --auth interactive requires --tenant (GUID or verified domain).")
+        from azure.identity import (  # noqa: WPS433
+            AuthenticationRecord,
+            InteractiveBrowserCredential,
+            TokenCachePersistenceOptions,
+        )
+        rec_path = os.environ.get("DVP_AUTH_RECORD_FILE", "dataverse/.authrecord.json")
+        cache_opts = TokenCachePersistenceOptions(name="dataverse-provision")
+        record = None
+        if os.path.exists(rec_path):
+            try:
+                with open(rec_path, "r", encoding="utf-8") as fh:
+                    record = AuthenticationRecord.deserialize(fh.read())
+            except Exception:
+                record = None
+        cred = InteractiveBrowserCredential(
+            tenant_id=args.tenant, client_id=AZ_CLI_CLIENT,
+            cache_persistence_options=cache_opts,
+            authentication_record=record,
+        )
+        if record is None:
+            new_record = cred.authenticate(scopes=[_dataverse_scope(args.url)])
+            try:
+                with open(rec_path, "w", encoding="utf-8") as fh:
+                    fh.write(new_record.serialize())
+            except OSError:
+                pass
+        return cred
     if not args.tenant:
         sys.exit("ERROR: --auth devicecode requires --tenant (GUID or verified domain).")
 
@@ -266,7 +296,7 @@ def main() -> int:
     ap.add_argument("--url", default=os.environ.get("PP_ENV_DEV"), help="Dataverse org URL")
     ap.add_argument("--solution", default=None, help="Solution unique name to own new objects")
     ap.add_argument("--prefix", default=None, help="Override publisher prefix (else payload.publisher.prefix)")
-    ap.add_argument("--auth", choices=["devicecode", "azurecli", "env"], default="devicecode")
+    ap.add_argument("--auth", choices=["devicecode", "interactive", "azurecli", "env"], default="devicecode")
     ap.add_argument("--tenant", default=None, help="Tenant GUID or verified domain (devicecode)")
     ap.add_argument("--dry-run", action="store_true", help="Print the plan; do not connect or mutate")
     ap.add_argument("--yes", action="store_true", help="Skip the confirmation prompt")

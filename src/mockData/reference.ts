@@ -45,14 +45,30 @@ export const mockTeamMembers: TeamMember[] = [
 const clientsById = new Map(mockClients.map((c) => [c.id, c]));
 const teamById = new Map(mockTeamMembers.map((m) => [m.id, m]));
 
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// In connected mode the provider returns real Dataverse display names (resolved
+// from lookup FormattedValue annotations), not mock ids. Resolvers therefore
+// fall back to returning the value as-is when it isn't a known mock id.
 export function clientName(id: string | undefined | null): string {
-  return (id && clientsById.get(id)?.name) || 'Unknown client';
+  if (!id) return 'Unknown client';
+  return clientsById.get(id)?.name || id;
 }
 
 export function teamMember(id: string | undefined | null): TeamMember | undefined {
-  return id ? teamById.get(id) : undefined;
+  if (!id) return undefined;
+  const known = teamById.get(id);
+  if (known) return known;
+  // A real display name coming from Dataverse — synthesize a member for avatars.
+  return { id, name: id, title: '', initials: initialsOf(id) };
 }
 
 export function leadName(id: string | undefined | null): string {
-  return (id && teamById.get(id)?.name) || 'Unassigned';
+  if (!id) return 'Unassigned';
+  return teamById.get(id)?.name || id;
 }
